@@ -1,0 +1,22 @@
+# Thư mục môi trường ảo
+venv/
+env/
+.env
+
+# Thư viện
+node_modules/
+__pycache__/
+*.pyc
+
+# Cơ sở dữ liệu và file lưu trữ
+backend/data/wms.db
+backend/data/*.db
+*.log
+
+# File nhạy cảm và cá nhân
+mat khau gửi email.txt
+*.txt
+
+# File tạm và hệ điều hành
+.DS_Store
+Thumbs.db
