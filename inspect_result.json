@@ -1,0 +1,48 @@
+{
+  "sheets": [
+    "TON_KHO",
+    "LICH_SU_NHAP",
+    "LICH_SU_XUAT",
+    "DATA",
+    "Sheet1",
+    "Sheet2"
+  ],
+  "data": {
+    "TON_KHO": [
+      "Unnamed: 0",
+      "Unnamed: 1",
+      "Unnamed: 2",
+      "Unnamed: 3",
+      "Unnamed: 4",
+      "Unnamed: 5",
+      "Unnamed: 6",
+      "Unnamed: 7",
+      "Unnamed: 8",
+      "."
+    ],
+    "LICH_SU_NHAP": [],
+    "LICH_SU_XUAT": [],
+    "DATA": [
+      "Unnamed: 0",
+      "Unnamed: 1",
+      "Unnamed: 2",
+      "Unnamed: 3",
+      "Unnamed: 4",
+      "Unnamed: 5",
+      "Unnamed: 6",
+      "Unnamed: 7"
+    ],
+    "Sheet1": [
+      "STT",
+      "Mã quản lý",
+      "Linh kiện quản lý"
+    ],
+    "Sheet2": [
+      "Unnamed: 0",
+      "Unnamed: 1",
+      "Unnamed: 2",
+      "Unnamed: 3",
+      "Unnamed: 4"
+    ]
+  }
+}

@@ -1,0 +1,55 @@
+﻿from typing import List
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+from .. import models, schemas, auth_utils, database, deps
+
+router = APIRouter(prefix="/api/users", tags=["users"])
+
+@router.get("/", response_model=List[schemas.UserResponse])
+def get_users(db: Session = Depends(database.get_db), current_admin: models.User = Depends(deps.get_current_admin)):
+    return db.query(models.User).all()
+
+@router.post("/", response_model=schemas.UserResponse)
+def create_user(user: schemas.UserCreate, db: Session = Depends(database.get_db), current_admin: models.User = Depends(deps.get_current_admin)):
+    db_user = db.query(models.User).filter(models.User.username == user.username).first()
+    if db_user:
+        raise HTTPException(status_code=400, detail="Username already registered")
+    
+    hashed_password = auth_utils.get_password_hash(user.password)
+    user_dict = user.model_dump()
+    del user_dict["password"]
+    
+    db_user = models.User(**user_dict, hashed_password=hashed_password)
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+@router.put("/{user_id}", response_model=schemas.UserResponse)
+def update_user(user_id: int, user: schemas.UserUpdate, db: Session = Depends(database.get_db), current_admin: models.User = Depends(deps.get_current_admin)):
+    db_user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+        
+    update_data = user.model_dump(exclude_unset=True)
+    if "password" in update_data:
+        update_data["hashed_password"] = auth_utils.get_password_hash(update_data.pop("password"))
+        
+    for key, value in update_data.items():
+        setattr(db_user, key, value)
+        
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+@router.delete("/{user_id}")
+def delete_user(user_id: int, db: Session = Depends(database.get_db), current_admin: models.User = Depends(deps.get_current_admin)):
+    db_user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    if db_user.username == "admin":
+        raise HTTPException(status_code=400, detail="Cannot delete default admin user")
+        
+    db.delete(db_user)
+    db.commit()
+    return {"ok": True}
