@@ -155,7 +155,7 @@ if (-not (Test-Path $dbFile)) {
 
 # --- Chay server lan dau
 $script:serverProcess = Start-Process -FilePath "cmd.exe" `
-    -ArgumentList "/c cd /d `"$($script:backendDir)`" && $pythonCmd -m uvicorn app.main:app --host 0.0.0.0 --port 8888 > `"$($script:logFile)`" 2>&1" `
+    -ArgumentList "/c cd /d `"$($script:backendDir)`" && `"$($script:pythonCmd)`" -m uvicorn app.main:app --host 0.0.0.0 --port 8888 > `"$($script:logFile)`" 2>&1" `
     -WindowStyle Hidden -PassThru
 
 # --- System Tray Icon ---
@@ -244,7 +244,7 @@ $menuRestart.Add_Click({
         Start-Sleep -Seconds 1
         # Khoi dong lai
         $script:serverProcess = Start-Process -FilePath "cmd.exe" `
-            -ArgumentList "/c cd /d `"$($script:backendDir)`" && $($script:pythonCmd) -m uvicorn app.main:app --host 0.0.0.0 --port 8888 > `"$($script:logFile)`" 2>&1" `
+            -ArgumentList "/c cd /d `"$($script:backendDir)`" && `"$($script:pythonCmd)`" -m uvicorn app.main:app --host 0.0.0.0 --port 8888 > `"$($script:logFile)`" 2>&1" `
             -WindowStyle Hidden -PassThru
         $script:notifyIcon.Icon = $script:onlineIcon
         $script:menuStatus.Text = "WMS Server dang chay"
