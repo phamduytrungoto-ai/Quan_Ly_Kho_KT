@@ -42,10 +42,20 @@ import io
 import shutil
 import stat
 import glob
+import json
+
+GITHUB_REPO = "phamduytrungoto-ai/Quan_Ly_Kho_KT"
+
+def _github_headers():
+    """Tạo headers cho GitHub API, kèm token nếu có."""
+    token = os.getenv("GITHUB_TOKEN", "").strip()
+    headers = {'User-Agent': 'WMS-Updater', 'Accept': 'application/vnd.github+json'}
+    if token:
+        headers['Authorization'] = f'token {token}'
+    return headers, bool(token)
 
 def find_git_executable():
     """Tìm git.exe trên máy, kể cả khi không nằm trong PATH."""
-    # Thử tìm trong PATH trước
     try:
         result = subprocess.run(["git", "--version"], capture_output=True, text=True)
         if result.returncode == 0:
@@ -53,7 +63,6 @@ def find_git_executable():
     except FileNotFoundError:
         pass
     
-    # Tìm trong các vị trí phổ biến trên Windows
     common_paths = [
         r"C:\Program Files\Git\cmd\git.exe",
         r"C:\Program Files (x86)\Git\cmd\git.exe",
@@ -67,7 +76,6 @@ def find_git_executable():
         if os.path.isfile(p):
             return p
     
-    # Tìm rộng hơn bằng glob
     for drive in ["C", "D", "E"]:
         for pattern in [f"{drive}:\\*\\Git\\cmd\\git.exe", f"{drive}:\\*\\PortableGit\\cmd\\git.exe", f"{drive}:\\*\\cmd\\git.exe"]:
             found = glob.glob(pattern)
@@ -76,74 +84,115 @@ def find_git_executable():
     
     return None
 
-@router.post("/update_system")
-def update_system(_ = Depends(require_admin)):
-    """Cập nhật hệ thống: Ưu tiên git pull, nếu không có git thì tải zip từ Github."""
-    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
-    output = ""
+@router.get("/releases")
+def get_releases(_ = Depends(require_admin)):
+    """Lấy danh sách phiên bản (releases + tags) từ GitHub."""
+    headers, has_token = _github_headers()
+    versions = []
     
-    git_exe = find_git_executable()
+    # Luôn thêm tùy chọn "Mới nhất (main)"
+    versions.append({
+        "tag": "main",
+        "name": "🔄 Mới nhất (nhánh main)",
+        "description": "Luôn cập nhật mã nguồn mới nhất từ nhánh chính",
+        "date": "",
+        "type": "branch"
+    })
     
-    if git_exe:
-        try:
-            # Cách 1: Thử git pull
-            result = subprocess.run([git_exe, "pull"], cwd=project_root, capture_output=True, text=True, timeout=60)
-            if result.returncode == 0:
-                return {"message": "Cập nhật thành công bằng Git. Vui lòng khởi động lại server.", "output": result.stdout}
-            else:
-                output = f"Git pull thất bại: {result.stderr}\nChuyển sang tải file zip...\n"
-        except subprocess.TimeoutExpired:
-            output = "Git pull quá thời gian chờ (60s). Chuyển sang tải file zip...\n"
-        except Exception as e:
-            output = f"Lỗi khi chạy git: {str(e)}\nChuyển sang tải file zip...\n"
-    else:
-        output = "Không tìm thấy Git trên máy. Chuyển sang tải mã nguồn trực tiếp (ZIP)...\n"
-
-    # Cách 2: Tải zip từ GitHub (hỗ trợ cả private repo qua API)
     try:
-        branches = ["main", "master"]
-        zip_content = None
-        last_err = None
-        
-        token = os.getenv("GITHUB_TOKEN", "").strip()
-        repo = "phamduytrungoto-ai/Quan_Ly_Kho_KT"
-        
-        for branch in branches:
+        # Lấy danh sách Releases
+        api_url = f"https://api.github.com/repos/{GITHUB_REPO}/releases?per_page=20"
+        req = urllib.request.Request(api_url, headers=headers)
+        with urllib.request.urlopen(req, timeout=15) as response:
+            releases = json.loads(response.read().decode())
+            for r in releases:
+                versions.append({
+                    "tag": r["tag_name"],
+                    "name": r.get("name") or r["tag_name"],
+                    "description": (r.get("body") or "")[:200],
+                    "date": (r.get("published_at") or "")[:10],
+                    "type": "release"
+                })
+    except Exception:
+        pass
+    
+    if len(versions) <= 1:
+        # Nếu không có release, thử lấy tags
+        try:
+            api_url = f"https://api.github.com/repos/{GITHUB_REPO}/tags?per_page=20"
+            req = urllib.request.Request(api_url, headers=headers)
+            with urllib.request.urlopen(req, timeout=15) as response:
+                tags = json.loads(response.read().decode())
+                for t in tags:
+                    versions.append({
+                        "tag": t["name"],
+                        "name": t["name"],
+                        "description": "",
+                        "date": "",
+                        "type": "tag"
+                    })
+        except Exception:
+            pass
+    
+    return {"versions": versions}
+
+@router.post("/update_system")
+def update_system(version: str = "main", _ = Depends(require_admin)):
+    """Cập nhật hệ thống theo phiên bản được chọn."""
+    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+    output = f"Phiên bản được chọn: {version}\n"
+    
+    # Nếu chọn main và có git → thử git pull
+    if version == "main":
+        git_exe = find_git_executable()
+        if git_exe:
             try:
-                if token:
-                    # Dùng GitHub API cho private repo
-                    api_url = f"https://api.github.com/repos/{repo}/zipball/{branch}"
-                    req = urllib.request.Request(api_url, headers={
-                        'User-Agent': 'WMS-Updater',
-                        'Authorization': f'token {token}',
-                        'Accept': 'application/vnd.github+json'
-                    })
+                result = subprocess.run([git_exe, "pull"], cwd=project_root, capture_output=True, text=True, timeout=60)
+                if result.returncode == 0:
+                    return {"message": "Cập nhật thành công bằng Git. Vui lòng khởi động lại server.", "output": result.stdout}
                 else:
-                    # URL trực tiếp cho public repo
-                    api_url = f"https://github.com/{repo}/archive/refs/heads/{branch}.zip"
-                    req = urllib.request.Request(api_url, headers={
-                        'User-Agent': 'WMS-Updater'
-                    })
-                    
+                    output += f"Git pull thất bại: {result.stderr}\nChuyển sang tải file zip...\n"
+            except subprocess.TimeoutExpired:
+                output += "Git pull quá thời gian chờ (60s). Chuyển sang tải file zip...\n"
+            except Exception as e:
+                output += f"Lỗi khi chạy git: {str(e)}\nChuyển sang tải file zip...\n"
+        else:
+            output += "Không tìm thấy Git trên máy. Chuyển sang tải mã nguồn trực tiếp (ZIP)...\n"
+
+    # Tải ZIP từ GitHub theo phiên bản
+    try:
+        zip_content = None
+        headers, has_token = _github_headers()
+        
+        # Xác định URL tải theo loại phiên bản
+        if version == "main":
+            refs_to_try = ["main", "master"]
+        else:
+            refs_to_try = [version]
+        
+        for ref in refs_to_try:
+            try:
+                if has_token:
+                    api_url = f"https://api.github.com/repos/{GITHUB_REPO}/zipball/{ref}"
+                else:
+                    api_url = f"https://github.com/{GITHUB_REPO}/archive/refs/heads/{ref}.zip" if ref in ["main", "master"] else f"https://github.com/{GITHUB_REPO}/archive/refs/tags/{ref}.zip"
+                
+                req = urllib.request.Request(api_url, headers=headers)
                 with urllib.request.urlopen(req, timeout=120) as response:
                     zip_content = response.read()
-                    output += f"Đã tải thành công từ nhánh '{branch}' ({len(zip_content) // 1024} KB).\n"
+                    output += f"Đã tải thành công phiên bản '{ref}' ({len(zip_content) // 1024} KB).\n"
                     break
             except urllib.error.HTTPError as e:
-                last_err = e
                 if e.code == 404:
                     continue
-                elif e.code == 401 or e.code == 403:
-                    raise Exception(f"Token GitHub không hợp lệ hoặc hết hạn (HTTP {e.code}). Vui lòng kiểm tra GITHUB_TOKEN trong file .env.")
+                elif e.code in (401, 403):
+                    raise Exception(f"Token GitHub không hợp lệ hoặc hết hạn (HTTP {e.code}).")
                 raise e
                 
         if not zip_content:
-            if last_err and last_err.code == 404:
-                raise Exception("Không tìm thấy mã nguồn (404). Nếu kho lưu trữ là Private, hãy cấu hình GITHUB_TOKEN trong file .env.")
-            raise Exception(f"Không thể tải mã nguồn. Lỗi: HTTP {last_err.code if last_err else 'unknown'}")
+            raise Exception(f"Không tìm thấy phiên bản '{version}' trên GitHub. Kiểm tra lại tên phiên bản hoặc quyền truy cập.")
             
         with zipfile.ZipFile(io.BytesIO(zip_content)) as zip_ref:
-            # Thư mục gốc trong file zip (ví dụ: 'Quan_Ly_Kho_KT-main' hoặc 'phamduytrungoto-ai-Quan_Ly_Kho_KT-abc1234')
             extracted_folder = zip_ref.namelist()[0].split('/')[0]
             
             updated_count = 0
@@ -151,7 +200,6 @@ def update_system(_ = Depends(require_admin)):
             for info in zip_ref.infolist():
                 if info.is_dir():
                     continue
-                # Bỏ qua thư mục data, uploads, log, file .env, wms.db để không ghi đè dữ liệu cục bộ
                 skip_patterns = ["/backend/data/", "/uploads/", "server.log", ".env", "wms.db", "__pycache__"]
                 if any(p in info.filename for p in skip_patterns):
                     skipped_count += 1
@@ -172,8 +220,6 @@ def update_system(_ = Depends(require_admin)):
                 updated_count += 1
                     
         output += f"\nĐã cập nhật {updated_count} file (bỏ qua {skipped_count} file dữ liệu)."
-        return {"message": "Cập nhật mã nguồn thành công. Vui lòng khởi động lại server (Chuột phải icon WMS khay hệ thống > Khoi dong lai server).", "output": output}
+        return {"message": f"Cập nhật phiên bản '{version}' thành công. Vui lòng khởi động lại server.", "output": output}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Lỗi cập nhật: {str(e)}\n\nLog:\n{output}")
-
-

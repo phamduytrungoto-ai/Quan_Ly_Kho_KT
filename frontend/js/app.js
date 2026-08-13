@@ -75,10 +75,23 @@ const App = {
                         <div id="tab-system" class="settings-tab-pane">
                             <div class="card mb-4" style="border: 1px solid var(--border-color); border-radius: 8px; padding: 15px;">
                                 <h4 style="margin-top: 0; margin-bottom: 15px; color: var(--primary-color);">Cập nhật Hệ thống</h4>
-                                <p class="text-muted mb-3" style="font-size: 0.9em;">Cập nhật phiên bản mới nhất từ Github. Bạn cần có kết nối internet và cài đặt Git. Sau khi cập nhật thành công, bạn cần khởi động lại server từ khay hệ thống.</p>
-                                <button id="btnUpdateSystem" class="btn btn-primary" style="margin-bottom: 10px;">
-                                    <i class="fas fa-cloud-download-alt"></i> Kiểm tra & Cập nhật
-                                </button>
+                                <p class="text-muted mb-3" style="font-size: 0.9em;">Cập nhật phiên bản từ Github. Sau khi cập nhật thành công, bạn cần khởi động lại server từ khay hệ thống.</p>
+                                
+                                <div style="display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 12px;">
+                                    <div style="flex: 1; min-width: 200px;">
+                                        <label class="form-label" style="margin-bottom: 5px; font-size: 0.85em;">Chọn phiên bản:</label>
+                                        <select id="selectVersion" class="form-control" style="width: 100%;">
+                                            <option value="main">🔄 Mới nhất (nhánh main)</option>
+                                        </select>
+                                    </div>
+                                    <button id="btnCheckVersions" class="btn btn-ghost text-info" style="padding: 8px 14px; white-space: nowrap;">
+                                        <i class="fas fa-search"></i> Kiểm tra phiên bản
+                                    </button>
+                                    <button id="btnUpdateSystem" class="btn btn-primary" style="padding: 8px 14px; white-space: nowrap;">
+                                        <i class="fas fa-cloud-download-alt"></i> Cập nhật
+                                    </button>
+                                </div>
+                                <div id="versionDescription" class="text-muted" style="font-size: 0.85em; margin-bottom: 10px; display: none;"></div>
                                 <div id="updateResult" style="padding: 10px; background: rgba(0,0,0,0.1); border-radius: 4px; display: none; white-space: pre-wrap; font-family: monospace; font-size: 0.85em; max-height: 150px; overflow-y: auto;"></div>
                             </div>
                         </div>
@@ -197,29 +210,82 @@ const App = {
                                 });
                             });
                             
+                            // Xử lý kiểm tra phiên bản
+                            const btnCheckVersions = modalBody.querySelector('#btnCheckVersions');
+                            const selectVersion = modalBody.querySelector('#selectVersion');
+                            const versionDesc = modalBody.querySelector('#versionDescription');
+                            let versionsData = [];
+                            
+                            if (btnCheckVersions) {
+                                btnCheckVersions.addEventListener('click', async () => {
+                                    btnCheckVersions.disabled = true;
+                                    btnCheckVersions.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang kiểm tra...';
+                                    try {
+                                        const res = await api.fetchJSON('/settings/releases');
+                                        versionsData = res.versions || [];
+                                        selectVersion.innerHTML = '';
+                                        versionsData.forEach(v => {
+                                            const opt = document.createElement('option');
+                                            opt.value = v.tag;
+                                            opt.textContent = v.date ? `${v.name} (${v.date})` : v.name;
+                                            selectVersion.appendChild(opt);
+                                        });
+                                        if (versionsData.length > 1) {
+                                            if (window.toast) window.toast.success(`Tìm thấy ${versionsData.length - 1} phiên bản`);
+                                        } else {
+                                            if (window.toast) window.toast.info('Chưa có phiên bản nào được tạo. Chỉ có nhánh main.');
+                                        }
+                                        // Hiển thị mô tả phiên bản đầu tiên
+                                        if (versionsData.length > 0 && versionsData[0].description) {
+                                            versionDesc.style.display = 'block';
+                                            versionDesc.textContent = versionsData[0].description;
+                                        }
+                                    } catch (err) {
+                                        if (window.toast) window.toast.error('Không thể kiểm tra phiên bản: ' + err.message);
+                                    } finally {
+                                        btnCheckVersions.disabled = false;
+                                        btnCheckVersions.innerHTML = '<i class="fas fa-search"></i> Kiểm tra phiên bản';
+                                    }
+                                });
+                            }
+                            
+                            // Hiển thị mô tả khi chọn phiên bản khác
+                            if (selectVersion) {
+                                selectVersion.addEventListener('change', () => {
+                                    const selected = versionsData.find(v => v.tag === selectVersion.value);
+                                    if (selected && selected.description) {
+                                        versionDesc.style.display = 'block';
+                                        versionDesc.textContent = selected.description;
+                                    } else {
+                                        versionDesc.style.display = 'none';
+                                    }
+                                });
+                            }
+
                             // Xử lý cập nhật
                             const btnUpdate = modalBody.querySelector('#btnUpdateSystem');
                             if (btnUpdate) {
                                 btnUpdate.addEventListener('click', async () => {
+                                    const selectedVersion = selectVersion.value;
                                     const resultDiv = modalBody.querySelector('#updateResult');
                                     btnUpdate.disabled = true;
-                                    btnUpdate.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+                                    btnUpdate.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang cập nhật...';
                                     resultDiv.style.display = 'block';
-                                    resultDiv.innerHTML = 'Đang kéo mã nguồn mới nhất từ Github...';
+                                    resultDiv.innerHTML = `Đang tải phiên bản "${selectedVersion}" từ Github...`;
                                     resultDiv.style.color = 'var(--text-main)';
                                     
                                     try {
-                                        const res = await api.fetchJSON('/settings/update_system', { method: 'POST' });
+                                        const res = await api.fetchJSON(`/settings/update_system?version=${encodeURIComponent(selectedVersion)}`, { method: 'POST' });
                                         resultDiv.innerHTML = res.message + '\n\nOutput:\n' + (res.output || '');
-                                        resultDiv.style.color = '#10b981'; // success
-                                        if (window.toast) window.toast.success('Cập nhật thành công');
+                                        resultDiv.style.color = '#10b981';
+                                        if (window.toast) window.toast.success('Cập nhật thành công! Hãy khởi động lại server.');
                                     } catch (err) {
                                         resultDiv.innerHTML = 'Lỗi cập nhật:\n' + err.message;
-                                        resultDiv.style.color = '#ef4444'; // danger
+                                        resultDiv.style.color = '#ef4444';
                                         if (window.toast) window.toast.error('Cập nhật thất bại: ' + err.message);
                                     } finally {
                                         btnUpdate.disabled = false;
-                                        btnUpdate.innerHTML = '<i class="fas fa-cloud-download-alt"></i> Kiểm tra & Cập nhật';
+                                        btnUpdate.innerHTML = '<i class="fas fa-cloud-download-alt"></i> Cập nhật';
                                     }
                                 });
                             }

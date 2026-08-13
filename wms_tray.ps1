@@ -101,20 +101,61 @@ function Set-AutoStart {
     }
 }
 
+# --- Tim lenh Python (py hoac python) ---
+$script:pythonCmd = "py"
+try {
+    $null = & py --version 2>&1
+    if ($LASTEXITCODE -ne 0) { throw "py not found" }
+} catch {
+    try {
+        $null = & python --version 2>&1
+        if ($LASTEXITCODE -eq 0) {
+            $script:pythonCmd = "python"
+        } else {
+            # Thu tim trong cac duong dan pho bien
+            $commonPaths = @(
+                "$env:LOCALAPPDATA\Programs\Python\Python*\python.exe",
+                "C:\Python*\python.exe",
+                "C:\Program Files\Python*\python.exe"
+            )
+            $found = $false
+            foreach ($pattern in $commonPaths) {
+                $matches = Get-ChildItem -Path $pattern -ErrorAction SilentlyContinue | Select-Object -First 1
+                if ($matches) {
+                    $script:pythonCmd = $matches.FullName
+                    $found = $true
+                    break
+                }
+            }
+            if (-not $found) {
+                Out-File -FilePath (Join-Path $scriptDir "tray_error.log") -InputObject "FATAL: Khong tim thay Python (py/python) tren he thong!" -Append
+                [System.Windows.Forms.MessageBox]::Show("Khong tim thay Python tren he thong!`nVui long cai dat Python 3.10+ va chon 'Add to PATH'.", "WMS Server - Loi", "OK", "Error")
+                exit 1
+            }
+        }
+    } catch {
+        Out-File -FilePath (Join-Path $scriptDir "tray_error.log") -InputObject "FATAL: Khong tim thay Python - $($_.Exception.Message)" -Append
+        [System.Windows.Forms.MessageBox]::Show("Khong tim thay Python tren he thong!`nVui long cai dat Python 3.10+ va chon 'Add to PATH'.", "WMS Server - Loi", "OK", "Error")
+        exit 1
+    }
+}
+$pythonCmd = $script:pythonCmd
+Out-File -FilePath (Join-Path $scriptDir "tray_error.log") -InputObject "Python command: $pythonCmd" -Append
+
 # --- Cai dat thu vien (lan dau) ---
 if (Test-Path $reqFile) {
-    Start-Process -FilePath "py" -ArgumentList "-m pip install -q -r `"$reqFile`"" -WindowStyle Hidden -Wait
+    Start-Process -FilePath $pythonCmd -ArgumentList "-m pip install -q -r `"$reqFile`"" -WindowStyle Hidden -Wait
 }
 
 # --- Seed DB neu lan dau ---
 if (-not (Test-Path $dbFile)) {
-    Start-Process -FilePath "py" -ArgumentList "-m pip install -q pandas openpyxl" -WindowStyle Hidden -Wait
-    Start-Process -FilePath "py" -ArgumentList "seed_data.py" -WorkingDirectory $scriptDir -WindowStyle Hidden -Wait
+    Start-Process -FilePath $pythonCmd -ArgumentList "-m pip install -q pandas openpyxl" -WindowStyle Hidden -Wait
+    Start-Process -FilePath $pythonCmd -ArgumentList "seed_data.py" -WorkingDirectory $scriptDir -WindowStyle Hidden -Wait
 }
 
 # --- Chay server lan dau
 $script:serverProcess = Start-Process -FilePath "cmd.exe" `
-    -ArgumentList "/c cd /d `"$($script:backendDir)`" && py -m uvicorn app.main:app --host 0.0.0.0 --port 8888 > `"$($script:logFile)`" 2>&1" `
+    -ArgumentList "/c cd /d `"$($script:backendDir)`" && $pythonCmd -m uvicorn app.main:app --host 0.0.0.0 --port 8888 > `"$($script:logFile)`" 2>&1" `
     -WindowStyle Hidden -PassThru
 
 # --- System Tray Icon ---
@@ -203,7 +244,7 @@ $menuRestart.Add_Click({
         Start-Sleep -Seconds 1
         # Khoi dong lai
         $script:serverProcess = Start-Process -FilePath "cmd.exe" `
-            -ArgumentList "/c cd /d `"$($script:backendDir)`" && py -m uvicorn app.main:app --host 0.0.0.0 --port 8888 > `"$($script:logFile)`" 2>&1" `
+            -ArgumentList "/c cd /d `"$($script:backendDir)`" && $($script:pythonCmd) -m uvicorn app.main:app --host 0.0.0.0 --port 8888 > `"$($script:logFile)`" 2>&1" `
             -WindowStyle Hidden -PassThru
         $script:notifyIcon.Icon = $script:onlineIcon
         $script:menuStatus.Text = "WMS Server dang chay"
