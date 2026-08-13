@@ -29,7 +29,14 @@ const TransfersPage = {
             </div>
         `;
         
-        document.getElementById('btnCreateTransfer').addEventListener('click', () => this.showModal());
+        document.getElementById('btnCreateTransfer').addEventListener('click', () => {
+            if (!window.Auth.hasPermission('perm_add')) {
+                if (window.toast) window.toast.error("Bạn không có quyền thực hiện thao tác này.");
+                else alert("Bạn không có quyền thực hiện thao tác này.");
+                return;
+            }
+            this.showModal();
+        });
         await this.loadData();
         this.bindGlobalEvents();
     },

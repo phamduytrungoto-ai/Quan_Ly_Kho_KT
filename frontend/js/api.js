@@ -144,6 +144,7 @@ const api = {
             
             return response.json();
         },
+        changePassword: (data) => api.fetchJSON('/auth/change-password', { method: 'POST', body: JSON.stringify(data) }),
         me: () => api.fetchJSON('/auth/me'),
         
         forgotPassword: (username) => api.fetchJSON('/auth/forgot-password', {
@@ -187,7 +188,7 @@ const api = {
         dashboard: () => api.fetchJSON(`/reports/dashboard?kho_id=${api.getKhoId()}`),
         getExcelUrl: (params = {}) => {
             const query = new URLSearchParams(params).toString();
-            return `${API_BASE_URL}/reports/export-excel${query ? '?' + query : ''}`;
+            return `${API_BASE_URL}/reports/export/inventory${query ? '?' + query : ''}`;
         },
         sendWarningEmail: (emails) => api.fetchJSON('/reports/send-warning-email', { method: 'POST', body: JSON.stringify({ emails, kho_id: api.getKhoId() }) })
     },

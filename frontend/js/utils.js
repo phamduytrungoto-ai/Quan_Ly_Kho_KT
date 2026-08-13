@@ -137,6 +137,14 @@ const utils = {
         const capMoiChar = isCapMoi ? '✓' : '';
         const thayTheChar = isThayThe ? '✓' : '';
         
+        let headerCapMoi = 'Cấp mới<br>新規提供';
+        let headerThayThe = 'Thay thế<br>交換';
+        if (type === 'transfer') {
+            headerCapMoi = 'Vị trí (Từ)<br>移動元';
+            headerThayThe = 'Vị trí (Đến)<br>移動先';
+        }
+
+        
         let dataCount = data.transactions ? data.transactions.length : 0;
         let rowCount = Math.max(5, dataCount);
         let trs = '';
@@ -145,6 +153,18 @@ const utils = {
                 const tx = data.transactions[i] || {};
                 const sl = tx.so_luong !== undefined ? utils.formatNumber(tx.so_luong) : '';
                 const tonCuoi = tx.ton_cuoi !== undefined ? utils.formatNumber(tx.ton_cuoi) : '';
+                
+                let valCapMoi = capMoiChar;
+                let valThayThe = thayTheChar;
+                let fontCapMoi = 'font-weight: bold;';
+                let fontThayThe = 'font-weight: bold;';
+                
+                if (type === 'transfer') {
+                    valCapMoi = utils.escapeHtml(tx.vi_tri_cu || '');
+                    valThayThe = utils.escapeHtml(tx.vi_tri_moi || '');
+                    fontCapMoi = '';
+                    fontThayThe = '';
+                }
                 
                 trs += `
                     <tr>
@@ -156,8 +176,8 @@ const utils = {
                         <td style="text-align: center;">${tx.cong_doan || ''}</td>
                         <td style="text-align: center;">${sl}</td>
                         <td style="text-align: center;">${tonCuoi}</td>
-                        <td style="text-align: center; font-weight: bold;">${capMoiChar}</td>
-                        <td style="text-align: center; font-weight: bold;">${thayTheChar}</td>
+                        <td style="text-align: center; ${fontCapMoi}">${valCapMoi}</td>
+                        <td style="text-align: center; ${fontThayThe}">${valThayThe}</td>
                         <td>${tx.ghi_chu || ''}</td>
                     </tr>
                 `;
@@ -252,8 +272,8 @@ const utils = {
                                 <th style="width: 8%;">Công đoạn sử dụng<br>使用工程</th>
                                 <th style="width: 7%;">SL xuất kho<br>倉庫出荷数量</th>
                                 <th style="width: 7%;">SL còn lại<br>残り数量</th>
-                                <th style="width: 6%;">Cấp mới<br>新規提供</th>
-                                <th style="width: 6%;">Thay thế<br>交換</th>
+                                <th style="width: 6%;">${headerCapMoi}</th>
+                                <th style="width: 6%;">${headerThayThe}</th>
                                 <th style="width: 9%;">Ghi chú<br>備考</th>
                             </tr>
                         </thead>

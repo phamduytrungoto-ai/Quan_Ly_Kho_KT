@@ -160,6 +160,30 @@ def get_transfer(id: int, db: Session = Depends(get_db), current_user = Depends(
     # We only take EXPORT transactions to avoid counting items twice (import and export)
     txs = [t for t in transfer.transactions if t.loai == TransactionType.EXPORT]
     
+    transactions_list = []
+    for tx in txs:
+        import_tx = db.query(Transaction).filter(
+            Transaction.transfer_id == id,
+            Transaction.loai == TransactionType.IMPORT,
+            Transaction.ma_so == tx.ma_so
+        ).first()
+        
+        vi_tri_cu = tx.item.vi_tri if tx.item and tx.item.vi_tri else ""
+        vi_tri_moi = import_tx.item.vi_tri if import_tx and import_tx.item and import_tx.item.vi_tri else ""
+        
+        transactions_list.append({
+            "ma_so": tx.ma_so,
+            "ten_hang": tx.ten_hang,
+            "so_luong": tx.so_luong,
+            "don_vi_tinh": tx.don_vi_tinh,
+            "cong_doan": tx.item.cong_doan if tx.item else "",
+            "ghi_chu": tx.ghi_chu,
+            "ton_cuoi": tx.item.ton_cuoi if tx.item else 0,
+            "dinh_muc": tx.item.dinh_muc if tx.item else 0,
+            "vi_tri_cu": vi_tri_cu,
+            "vi_tri_moi": vi_tri_moi
+        })
+    
     return {
         "id": transfer.id,
         "ma_phieu": transfer.ma_phieu,
@@ -169,18 +193,7 @@ def get_transfer(id: int, db: Session = Depends(get_db), current_user = Depends(
         "nguoi_chuyen": transfer.nguoi_chuyen,
         "ghi_chu": transfer.ghi_chu,
         "ma_kho": transfer.tu_kho.ma_kho if transfer.tu_kho else "DP-EE",
-        "transactions": [
-            {
-                "ma_so": tx.ma_so,
-                "ten_hang": tx.ten_hang,
-                "so_luong": tx.so_luong,
-                "don_vi_tinh": tx.don_vi_tinh,
-                "cong_doan": tx.item.cong_doan if tx.item else "",
-                "ghi_chu": tx.ghi_chu,
-                "ton_cuoi": tx.item.ton_cuoi if tx.item else 0,
-                "dinh_muc": tx.item.dinh_muc if tx.item else 0
-            } for tx in txs
-        ]
+        "transactions": transactions_list
     }
 
 @router.get("/{id}/export-excel")

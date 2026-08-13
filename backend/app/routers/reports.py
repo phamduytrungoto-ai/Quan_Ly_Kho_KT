@@ -3,7 +3,7 @@ API endpoints for Reports & Dashboard.
 """
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
-from sqlalchemy import func, extract, case
+from sqlalchemy import func, extract, case, or_
 from typing import Optional
 from datetime import date, timedelta
 
@@ -160,6 +160,7 @@ def export_inventory_excel(
     sort_by: Optional[str] = "id",
     sort_dir: Optional[str] = "asc",
     low_stock: Optional[bool] = None,
+    loai_vat_tu: Optional[str] = None,
     db: Session = Depends(get_db), 
     current_user = Depends(require_permission("perm_excel"))
 ):
@@ -216,6 +217,8 @@ def export_inventory_excel(
         query = query.filter(Item.trang_thai == trang_thai)
     if cong_doan:
         query = query.filter(func.lower(Item.cong_doan).contains(cong_doan.lower()))
+    if loai_vat_tu:
+        query = query.filter(Item.loai_vat_tu == loai_vat_tu)
     if low_stock:
         query = query.filter(or_(Item.ton_cuoi <= 0, Item.ton_cuoi <= Item.dinh_muc))
 

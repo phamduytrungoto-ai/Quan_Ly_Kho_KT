@@ -47,7 +47,7 @@ const App = {
         if (window.Auth.user.is_admin) {
             document.getElementById('nav-users').style.display = 'flex';
             document.getElementById('nav-warehouses').style.display = 'flex';
-            document.getElementById('btnSettings').style.display = 'block';
+            document.getElementById('btnSettings').style.display = 'flex';
             
             // Xử lý nút Cài đặt
             document.getElementById('btnSettings').addEventListener('click', async () => {
@@ -60,63 +60,89 @@ const App = {
                     const settings = {};
                     settingsArr.forEach(s => settings[s.key] = s.value);
                     
-                    let content = `<div class="warehouse-settings-list" style="max-height: 60vh; overflow-y: auto;">`;
+                    let content = `
+                        <div class="settings-container">
+                            <div class="settings-tabs" style="display: flex; gap: 10px; border-bottom: 1px solid var(--border-color); margin-bottom: 20px; padding-bottom: 10px;">
+                                <button class="btn btn-primary settings-tab-btn" data-target="tab-system" style="padding: 8px 15px;"><i class="fas fa-sync-alt"></i> Cập nhật</button>
+                                <button class="btn btn-ghost text-muted settings-tab-btn" data-target="tab-email" style="padding: 8px 15px;"><i class="fas fa-envelope"></i> SMTP Server</button>
+                                <button class="btn btn-ghost text-muted settings-tab-btn" data-target="tab-warehouse" style="padding: 8px 15px;"><i class="fas fa-warehouse"></i> Cảnh báo Kho</button>
+                            </div>
+                            <div class="settings-content" style="max-height: 55vh; overflow-y: auto; padding-right: 5px;">
+                    `;
                     
-                    // Add SMTP Settings Section
+                    // Add System Update Section (Tab 1)
                     content += `
-                        <div class="card mb-4" style="border: 1px solid var(--border-color); border-radius: 8px; padding: 15px;">
-                            <h4 style="margin-top: 0; margin-bottom: 15px; color: var(--primary-color); border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
-                                <i class="fas fa-envelope"></i> Cấu hình Máy chủ Gửi Email (SMTP)
-                            </h4>
-                            <p class="text-muted mb-3" style="font-size: 0.9em;">Cấu hình ưu tiên lấy từ giao diện này. Nếu để trống sẽ sử dụng cấu hình mặc định trong file .env.</p>
-                            
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                                <!-- Primary -->
-                                <div>
-                                    <h5 style="margin: 0 0 10px 0; color: #fff;">1. Máy chủ Nội bộ (Mạng LAN)</h5>
-                                    <div class="form-group mb-2">
-                                        <label class="form-label">SMTP_HOST</label>
-                                        <input type="text" id="sys_SMTP_HOST" class="form-control" value="${settings.SMTP_HOST || ''}" placeholder="vd: 192.168.1.100">
-                                    </div>
-                                    <div class="form-group mb-2">
-                                        <label class="form-label">SMTP_PORT</label>
-                                        <input type="number" id="sys_SMTP_PORT" class="form-control" value="${settings.SMTP_PORT || ''}" placeholder="587">
-                                    </div>
-                                    <div class="form-group mb-2">
-                                        <label class="form-label">SMTP_USER (Tùy chọn)</label>
-                                        <input type="text" id="sys_SMTP_USER" class="form-control" value="${settings.SMTP_USER || ''}">
-                                    </div>
-                                    <div class="form-group mb-2">
-                                        <label class="form-label">SMTP_PASSWORD (Tùy chọn)</label>
-                                        <input type="password" id="sys_SMTP_PASSWORD" class="form-control" value="${settings.SMTP_PASSWORD || ''}">
-                                    </div>
-                                </div>
+                        <div id="tab-system" class="settings-tab-pane">
+                            <div class="card mb-4" style="border: 1px solid var(--border-color); border-radius: 8px; padding: 15px;">
+                                <h4 style="margin-top: 0; margin-bottom: 15px; color: var(--primary-color);">Cập nhật Hệ thống</h4>
+                                <p class="text-muted mb-3" style="font-size: 0.9em;">Cập nhật phiên bản mới nhất từ Github. Bạn cần có kết nối internet và cài đặt Git. Sau khi cập nhật thành công, bạn cần khởi động lại server từ khay hệ thống.</p>
+                                <button id="btnUpdateSystem" class="btn btn-primary" style="margin-bottom: 10px;">
+                                    <i class="fas fa-cloud-download-alt"></i> Kiểm tra & Cập nhật
+                                </button>
+                                <div id="updateResult" style="padding: 10px; background: rgba(0,0,0,0.1); border-radius: 4px; display: none; white-space: pre-wrap; font-family: monospace; font-size: 0.85em; max-height: 150px; overflow-y: auto;"></div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Add SMTP Settings Section (Tab 2)
+                    content += `
+                        <div id="tab-email" class="settings-tab-pane" style="display: none;">
+                            <div class="card mb-4" style="border: 1px solid var(--border-color); border-radius: 8px; padding: 15px;">
+                                <h4 style="margin-top: 0; margin-bottom: 15px; color: var(--primary-color);">Cấu hình Máy chủ Gửi Email (SMTP)</h4>
+                                <p class="text-muted mb-3" style="font-size: 0.9em;">Cấu hình ưu tiên lấy từ giao diện này. Nếu để trống sẽ sử dụng cấu hình mặc định trong file .env.</p>
                                 
-                                <!-- Fallback -->
-                                <div>
-                                    <h5 style="margin: 0 0 10px 0; color: #fff;">2. Dự phòng (Mạng ngoài/Gmail)</h5>
-                                    <div class="form-group mb-2">
-                                        <label class="form-label">SMTP_FALLBACK_HOST</label>
-                                        <input type="text" id="sys_SMTP_FALLBACK_HOST" class="form-control" value="${settings.SMTP_FALLBACK_HOST || ''}" placeholder="vd: smtp.gmail.com">
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                    <!-- Primary -->
+                                    <div>
+                                        <h5 style="margin: 0 0 10px 0; color: #fff;">1. Máy chủ Nội bộ (Mạng LAN)</h5>
+                                        <div class="form-group mb-2">
+                                            <label class="form-label">SMTP_HOST</label>
+                                            <input type="text" id="sys_SMTP_HOST" class="form-control" value="${settings.SMTP_HOST || ''}" placeholder="vd: 192.168.1.100">
+                                        </div>
+                                        <div class="form-group mb-2">
+                                            <label class="form-label">SMTP_PORT</label>
+                                            <input type="number" id="sys_SMTP_PORT" class="form-control" value="${settings.SMTP_PORT || ''}" placeholder="587">
+                                        </div>
+                                        <div class="form-group mb-2">
+                                            <label class="form-label">SMTP_USER (Tùy chọn)</label>
+                                            <input type="text" id="sys_SMTP_USER" class="form-control" value="${settings.SMTP_USER || ''}">
+                                        </div>
+                                        <div class="form-group mb-2">
+                                            <label class="form-label">SMTP_PASSWORD (Tùy chọn)</label>
+                                            <input type="password" id="sys_SMTP_PASSWORD" class="form-control" value="${settings.SMTP_PASSWORD || ''}">
+                                        </div>
                                     </div>
-                                    <div class="form-group mb-2">
-                                        <label class="form-label">SMTP_FALLBACK_PORT</label>
-                                        <input type="number" id="sys_SMTP_FALLBACK_PORT" class="form-control" value="${settings.SMTP_FALLBACK_PORT || ''}" placeholder="465">
-                                    </div>
-                                    <div class="form-group mb-2">
-                                        <label class="form-label">SMTP_FALLBACK_USER</label>
-                                        <input type="text" id="sys_SMTP_FALLBACK_USER" class="form-control" value="${settings.SMTP_FALLBACK_USER || ''}">
-                                    </div>
-                                    <div class="form-group mb-2">
-                                        <label class="form-label">SMTP_FALLBACK_PASSWORD</label>
-                                        <input type="password" id="sys_SMTP_FALLBACK_PASSWORD" class="form-control" value="${settings.SMTP_FALLBACK_PASSWORD || ''}">
+                                    
+                                    <!-- Fallback -->
+                                    <div>
+                                        <h5 style="margin: 0 0 10px 0; color: #fff;">2. Dự phòng (Mạng ngoài/Gmail)</h5>
+                                        <div class="form-group mb-2">
+                                            <label class="form-label">SMTP_FALLBACK_HOST</label>
+                                            <input type="text" id="sys_SMTP_FALLBACK_HOST" class="form-control" value="${settings.SMTP_FALLBACK_HOST || ''}" placeholder="vd: smtp.gmail.com">
+                                        </div>
+                                        <div class="form-group mb-2">
+                                            <label class="form-label">SMTP_FALLBACK_PORT</label>
+                                            <input type="number" id="sys_SMTP_FALLBACK_PORT" class="form-control" value="${settings.SMTP_FALLBACK_PORT || ''}" placeholder="465">
+                                        </div>
+                                        <div class="form-group mb-2">
+                                            <label class="form-label">SMTP_FALLBACK_USER</label>
+                                            <input type="text" id="sys_SMTP_FALLBACK_USER" class="form-control" value="${settings.SMTP_FALLBACK_USER || ''}">
+                                        </div>
+                                        <div class="form-group mb-2">
+                                            <label class="form-label">SMTP_FALLBACK_PASSWORD</label>
+                                            <input type="password" id="sys_SMTP_FALLBACK_PASSWORD" class="form-control" value="${settings.SMTP_FALLBACK_PASSWORD || ''}">
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     `;
                     
-                    content += `<p class="text-muted mb-3"><i class="fas fa-info-circle"></i> Cài đặt tự động gửi email cảnh báo hàng dưới định mức cho từng kho.</p>`;
+                    // Add Warehouse Settings Section (Tab 3)
+                    content += `
+                        <div id="tab-warehouse" class="settings-tab-pane" style="display: none;">
+                            <p class="text-muted mb-3"><i class="fas fa-info-circle"></i> Cài đặt tự động gửi email cảnh báo hàng dưới định mức cho từng kho.</p>
+                    `;
                     
                     warehouses.forEach(wh => {
                         const isEnabled = wh.email_enabled;
@@ -143,12 +169,61 @@ const App = {
                             </div>
                         `;
                     });
-                    content += `</div>`;
+                    content += `</div></div></div>`;
                     
                     window.modal.show({
                         title: 'Cài đặt hệ thống',
                         content: content,
                         width: '800px',
+                        onShow: (modalBody) => {
+                            // Xử lý chuyển tab
+                            const tabBtns = modalBody.querySelectorAll('.settings-tab-btn');
+                            const tabPanes = modalBody.querySelectorAll('.settings-tab-pane');
+                            
+                            tabBtns.forEach(btn => {
+                                btn.addEventListener('click', () => {
+                                    tabBtns.forEach(b => {
+                                        b.classList.remove('btn-primary');
+                                        b.classList.add('btn-ghost', 'text-muted');
+                                    });
+                                    tabPanes.forEach(p => p.style.display = 'none');
+                                    
+                                    btn.classList.remove('btn-ghost', 'text-muted');
+                                    btn.classList.add('btn-primary');
+                                    
+                                    const targetId = btn.getAttribute('data-target');
+                                    const targetPane = modalBody.querySelector('#' + targetId);
+                                    if(targetPane) targetPane.style.display = 'block';
+                                });
+                            });
+                            
+                            // Xử lý cập nhật
+                            const btnUpdate = modalBody.querySelector('#btnUpdateSystem');
+                            if (btnUpdate) {
+                                btnUpdate.addEventListener('click', async () => {
+                                    const resultDiv = modalBody.querySelector('#updateResult');
+                                    btnUpdate.disabled = true;
+                                    btnUpdate.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+                                    resultDiv.style.display = 'block';
+                                    resultDiv.innerHTML = 'Đang kéo mã nguồn mới nhất từ Github...';
+                                    resultDiv.style.color = 'var(--text-main)';
+                                    
+                                    try {
+                                        const res = await api.fetchJSON('/settings/update_system', { method: 'POST' });
+                                        resultDiv.innerHTML = res.message + '\n\nOutput:\n' + (res.output || '');
+                                        resultDiv.style.color = '#10b981'; // success
+                                        if (window.toast) window.toast.success('Cập nhật thành công');
+                                    } catch (err) {
+                                        resultDiv.innerHTML = 'Lỗi cập nhật:\n' + err.message;
+                                        resultDiv.style.color = '#ef4444'; // danger
+                                        if (window.toast) window.toast.error('Cập nhật thất bại: ' + err.message);
+                                    } finally {
+                                        btnUpdate.disabled = false;
+                                        btnUpdate.innerHTML = '<i class="fas fa-cloud-download-alt"></i> Kiểm tra & Cập nhật';
+                                    }
+                                });
+                            }
+                        },
                         buttons: [
                             { text: 'Hủy', class: 'btn-ghost text-muted' },
                             {
@@ -205,10 +280,74 @@ const App = {
             });
         }
 
+        // Đổi mật khẩu
+        window.openModal = function(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.add('show');
+        };
+        window.closeModal = function(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.remove('show');
+        };
+
+        const btnChangePassword = document.getElementById('btnChangePassword');
+        if (btnChangePassword) {
+            btnChangePassword.addEventListener('click', () => {
+                const form = document.getElementById('changePasswordForm');
+                if (form) form.reset();
+                window.openModal('changePasswordModal');
+            });
+        }
+        
+        // Xử lý form đổi mật khẩu
+        const changePasswordForm = document.getElementById('changePasswordForm');
+        if (changePasswordForm) {
+            changePasswordForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formData = new FormData(changePasswordForm);
+                const old_password = formData.get('old_password');
+                const new_password = formData.get('new_password');
+                const confirm_password = formData.get('confirm_password');
+                
+                if (new_password !== confirm_password) {
+                    if (window.toast) window.toast.error("Mật khẩu xác nhận không khớp!");
+                    else alert("Mật khẩu xác nhận không khớp!");
+                    return;
+                }
+                
+                const btnSave = document.getElementById('btnSaveChangePassword');
+                const originalText = btnSave.innerHTML;
+                btnSave.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang lưu...';
+                btnSave.disabled = true;
+                
+                try {
+                    const res = await api.auth.changePassword({ old_password, new_password });
+                    if (window.toast) window.toast.success(res.message);
+                    window.closeModal('changePasswordModal');
+                    setTimeout(() => {
+                        window.Auth.logout();
+                    }, 1500);
+                } catch (error) {
+                    if (window.toast) window.toast.error(error.message);
+                    else alert(error.message);
+                } finally {
+                    btnSave.innerHTML = originalText;
+                    btnSave.disabled = false;
+                }
+            });
+        }
+
         // Đăng xuất
         document.getElementById('btnLogout').addEventListener('click', () => {
             if (confirm('Bạn có chắc muốn đăng xuất?')) {
                 window.Auth.logout();
+            }
+        });
+        // Đóng dropdown khi click ra ngoài
+        document.addEventListener('click', () => {
+            const d = document.getElementById('userMenuDropdown');
+            if (d && d.style.display === 'flex') {
+                d.style.display = 'none';
             }
         });
 

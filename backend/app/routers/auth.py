@@ -89,3 +89,13 @@ def reset_password(request: schemas.ResetPasswordRequest, db: Session = Depends(
     db.commit()
     
     return {"message": "Đổi mật khẩu thành công. Bạn có thể đăng nhập bằng mật khẩu mới."}
+
+@router.post("/change-password")
+def change_password(request: schemas.ChangePasswordRequest, current_user: models.User = Depends(deps.get_current_user), db: Session = Depends(database.get_db)):
+    if not auth_utils.verify_password(request.old_password, current_user.hashed_password):
+        raise HTTPException(status_code=400, detail="Mật khẩu cũ không chính xác.")
+        
+    current_user.hashed_password = auth_utils.get_password_hash(request.new_password)
+    db.commit()
+    
+    return {"message": "Đổi mật khẩu thành công!"}

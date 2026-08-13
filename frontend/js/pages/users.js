@@ -262,6 +262,13 @@ const UsersPage = {
     },
 
     bindEvents() {
-        document.querySelector('#page-users #btnCreateUser').addEventListener('click', () => this.showModal());
+        document.querySelector('#page-users #btnCreateUser').addEventListener('click', () => {
+            if (!window.Auth.hasPermission('perm_add')) {
+                if (window.toast) window.toast.error("Bạn không có quyền thực hiện thao tác này.");
+                else alert("Bạn không có quyền thực hiện thao tác này.");
+                return;
+            }
+            this.showModal();
+        });
     }
 };

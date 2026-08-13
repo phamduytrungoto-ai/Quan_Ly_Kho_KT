@@ -397,3 +397,7 @@ class ResetPasswordRequest(BaseModel):
     username: str
     otp: str
     new_password: str
+
+class ChangePasswordRequest(BaseModel):
+    old_password: str
+    new_password: str

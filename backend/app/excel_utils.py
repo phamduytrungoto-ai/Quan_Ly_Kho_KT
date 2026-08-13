@@ -105,11 +105,18 @@ def generate_receipt_excel(data: dict, receipt_type: str = "issue") -> io.BytesI
             cell.alignment = Alignment(vertical="center")
 
     # Row 6: Table Headers
+    if receipt_type == 'transfer':
+        header_cap_moi = "Vị trí (Từ)\n移動元"
+        header_thay_the = "Vị trí (Đến)\n移動先"
+    else:
+        header_cap_moi = "Cấp mới\n新規提供"
+        header_thay_the = "Thay thế\n交換"
+
     headers = [
         "STT\nNo.", "Tên linh kiện\n部品名", "Mã linh kiện\n部品番号", 
         "SL yêu cầu\n依頼数量", "Đơn vị\n単位", "Công đoạn sử dụng\n使用工程", 
-        "SL xuất kho\n倉庫出荷数量", "SL còn lại\n残り数量", "Cấp mới\n新規提供", 
-        "Thay thế\n交換", "Ghi chú\n備考"
+        "SL xuất kho\n倉庫出荷数量", "SL còn lại\n残り数量", header_cap_moi, 
+        header_thay_the, "Ghi chú\n備考"
     ]
     for col_idx, header in enumerate(headers, 1):
         cell = ws.cell(row=6, column=col_idx, value=header)
@@ -138,6 +145,13 @@ def generate_receipt_excel(data: dict, receipt_type: str = "issue") -> io.BytesI
             except:
                 pass
 
+            if receipt_type == 'transfer':
+                val_cap_moi = tx.get("vi_tri_cu", "")
+                val_thay_the = tx.get("vi_tri_moi", "")
+            else:
+                val_cap_moi = cap_moi_char
+                val_thay_the = thay_the_char
+
             row_data = [
                 i + 1,
                 tx.get("ten_hang", ""),
@@ -147,8 +161,8 @@ def generate_receipt_excel(data: dict, receipt_type: str = "issue") -> io.BytesI
                 tx.get("cong_doan", ""),
                 tx.get("so_luong", ""),
                 tx.get("ton_cuoi", ""),
-                cap_moi_char,
-                thay_the_char,
+                val_cap_moi,
+                val_thay_the,
                 tx.get("ghi_chu", "")
             ]
         else:

@@ -1463,11 +1463,11 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.8) brig
 /* ============================================================
    PERMISSION BASED HIDING
    ============================================================ */
-body.no-perm-add .btn-success,
+/* body.no-perm-add .btn-success,
 body.no-perm-add #btnToggleForm,
 body.no-perm-add [id^="btnCreate"] {
     display: none !important;
-}
+} */
 
 body.no-perm-edit .btn-edit,
 body.no-perm-edit .btn-warning {

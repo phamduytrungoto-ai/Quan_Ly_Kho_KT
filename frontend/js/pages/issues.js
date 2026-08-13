@@ -379,6 +379,11 @@ const IssuesPage = {
         const formCard = document.querySelector('#page-issues #issueFormCard');
 
         btnToggleForm.addEventListener('click', () => {
+            if (!window.Auth.hasPermission('perm_add')) {
+                if (window.toast) window.toast.error("Bạn không có quyền thực hiện thao tác này.");
+                else alert("Bạn không có quyền thực hiện thao tác này.");
+                return;
+            }
             formCard.style.display = 'block';
             btnToggleForm.style.display = 'none';
         });
