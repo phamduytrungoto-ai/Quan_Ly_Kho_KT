@@ -308,9 +308,6 @@ const ReportsPage = {
                                 <div style="width: 52px; height: 52px; border-radius: 12px; background: rgba(59, 130, 246, 0.1); display: flex; align-items: center; justify-content: center; color: #3b82f6; font-size: 1.5rem;">
                                     <i class="fas fa-boxes-stacked"></i>
                                 </div>
-                                <span style="background: rgba(16, 185, 129, 0.15); color: #10b981; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; display: flex; align-items: center; gap: 5px;">
-                                    <i class="fas fa-check-circle"></i> Sẵn sàng
-                                </span>
                             </div>
                             <h4 style="margin: 0 0 10px 0; color: var(--text-main); font-weight: 600; font-size: 1.15rem;">Báo cáo Tồn kho</h4>
                             <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 15px; line-height: 1.6; min-height: 45px;">Tải xuống file Excel chứa toàn bộ dữ liệu vật tư, linh kiện và số lượng tồn kho hiện tại.</p>
@@ -339,9 +336,6 @@ const ReportsPage = {
                                 <div style="width: 52px; height: 52px; border-radius: 12px; background: rgba(16, 185, 129, 0.1); display: flex; align-items: center; justify-content: center; color: #10b981; font-size: 1.5rem;">
                                     <i class="fas fa-exchange-alt"></i>
                                 </div>
-                                <span style="background: rgba(16, 185, 129, 0.15); color: #10b981; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; display: flex; align-items: center; gap: 5px;">
-                                    <i class="fas fa-check-circle"></i> Sẵn sàng
-                                </span>
                             </div>
                             <h4 style="margin: 0 0 10px 0; color: var(--text-main); font-weight: 600; font-size: 1.15rem;">Lịch sử Nhập / Xuất</h4>
                             <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 15px; line-height: 1.6; min-height: 45px;">Báo cáo chi tiết các giao dịch nhập xuất kho trong một khoảng thời gian cụ thể.</p>
@@ -380,9 +374,6 @@ const ReportsPage = {
                                 <div style="width: 52px; height: 52px; border-radius: 12px; background: rgba(245, 158, 11, 0.1); display: flex; align-items: center; justify-content: center; color: #f59e0b; font-size: 1.5rem;">
                                     <i class="fas fa-exclamation-triangle"></i>
                                 </div>
-                                <span style="background: rgba(16, 185, 129, 0.15); color: #10b981; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; display: flex; align-items: center; gap: 5px;">
-                                    <i class="fas fa-check-circle"></i> Sẵn sàng
-                                </span>
                             </div>
                             <h4 style="margin: 0 0 10px 0; color: var(--text-main); font-weight: 600; font-size: 1.15rem;">Hàng dưới Định Mức</h4>
                             <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 24px; line-height: 1.6; min-height: 104px;">Tổng hợp danh sách các mặt hàng đang có số lượng tồn kho thấp hơn định mức an toàn. Rất hữu ích để lên kế hoạch nhập hàng.</p>

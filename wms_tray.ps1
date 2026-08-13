@@ -153,6 +153,14 @@ if (-not (Test-Path $dbFile)) {
     Start-Process -FilePath $pythonCmd -ArgumentList "seed_data.py" -WorkingDirectory $scriptDir -WindowStyle Hidden -Wait
 }
 
+# --- Giai phong port 8888 truoc khi chay (de phong mo nhieu lan) ---
+$connections = netstat -aon 2>$null | Select-String ":8888.*LISTENING"
+foreach ($c in $connections) {
+    $pid_num = ($c -split '\s+')[-1]
+    if ($pid_num -match '^\d+$') { Stop-Process -Id $pid_num -Force -ErrorAction SilentlyContinue }
+}
+Start-Sleep -Seconds 1
+
 # --- Chay server lan dau
 $script:serverProcess = Start-Process -FilePath "cmd.exe" `
     -ArgumentList "/c cd /d `"$($script:backendDir)`" && `"$($script:pythonCmd)`" -m uvicorn app.main:app --host 0.0.0.0 --port 8888 > `"$($script:logFile)`" 2>&1" `

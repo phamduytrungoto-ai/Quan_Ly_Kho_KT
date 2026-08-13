@@ -35,12 +35,24 @@ echo ===================================================
 echo Buoc 2: Cai dat cac thu vien cho may chu (backend)...
 cd backend
 %PYTHON_CMD% -m pip install -r requirements.txt
+if %errorlevel% neq 0 (
+    echo [LOI] Khong the cai dat cac thu vien trong requirements.txt!
+    echo Vui long kiem tra lai ket noi mang hoac loi hien thi ben tren.
+    pause
+    exit /b 1
+)
 cd ..
 
 echo.
 echo ===================================================
 echo Buoc 3: Cai dat cac thu vien phu tro (xu ly Excel)...
 %PYTHON_CMD% -m pip install pandas openpyxl
+if %errorlevel% neq 0 (
+    echo [LOI] Khong the cai dat pandas va openpyxl!
+    echo Vui long kiem tra lai ket noi mang hoac loi hien thi ben tren.
+    pause
+    exit /b 1
+)
 
 echo.
 echo ===================================================
