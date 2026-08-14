@@ -57,7 +57,7 @@ const InventoryPage = {
                 <div id="inventoryTable"></div>
             </div>
         `;
-        
+
         container.innerHTML = html;
         this.initTable();
         this.attachEvents();
@@ -81,38 +81,44 @@ const InventoryPage = {
             onRowClick: (row) => this.showItemDetails(row),
             columns: [
                 { title: 'STT', key: 'id', width: '50px', align: 'center', render: (val, row, idx) => idx + 1 + (InventoryPage.params.page - 1) * InventoryPage.params.page_size },
-                { title: 'HÌNH ẢNH', key: 'hinh_anh', width: '80px', align: 'center', render: (val, row) => {
-                    let imgHtml = '<div class="text-muted" style="width: 45px; height: 45px; background: var(--bg-input); border-radius: 6px; display: flex; align-items: center; justify-content: center; margin: 0 auto;"><i class="fas fa-image"></i></div>';
-                    if (val) {
-                        try {
-                            let images = JSON.parse(val);
-                            if (!Array.isArray(images)) images = [val];
-                            if (images.length > 0) {
-                                imgHtml = `<img src="${images[0]}" style="width: 45px; height: 45px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border-color); background: white;" onerror="this.onerror=null; this.outerHTML='<div class=\\'text-muted\\' style=\\'width: 45px; height: 45px; background: var(--bg-input); border-radius: 6px; display: flex; align-items: center; justify-content: center; margin: 0 auto;\\'><i class=\\'fas fa-image\\'></i></div>'">`;
+                {
+                    title: 'HÌNH ẢNH', key: 'hinh_anh', width: '80px', align: 'center', render: (val, row) => {
+                        let imgHtml = '<div class="text-muted" style="width: 45px; height: 45px; background: var(--bg-input); border-radius: 6px; display: flex; align-items: center; justify-content: center; margin: 0 auto;"><i class="fas fa-image"></i></div>';
+                        if (val) {
+                            try {
+                                let images = JSON.parse(val);
+                                if (!Array.isArray(images)) images = [val];
+                                if (images.length > 0) {
+                                    imgHtml = `<img src="${images[0]}" style="width: 45px; height: 45px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border-color); background: white;" onerror="this.onerror=null; this.outerHTML='<div class=\\'text-muted\\' style=\\'width: 45px; height: 45px; background: var(--bg-input); border-radius: 6px; display: flex; align-items: center; justify-content: center; margin: 0 auto;\\'><i class=\\'fas fa-image\\'></i></div>'">`;
+                                }
+                            } catch (e) {
+                                imgHtml = `<img src="${val}" style="width: 45px; height: 45px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border-color); background: white;" onerror="this.onerror=null; this.outerHTML='<div class=\\'text-muted\\' style=\\'width: 45px; height: 45px; background: var(--bg-input); border-radius: 6px; display: flex; align-items: center; justify-content: center; margin: 0 auto;\\'><i class=\\'fas fa-image\\'></i></div>'">`;
                             }
-                        } catch(e) {
-                            imgHtml = `<img src="${val}" style="width: 45px; height: 45px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border-color); background: white;" onerror="this.onerror=null; this.outerHTML='<div class=\\'text-muted\\' style=\\'width: 45px; height: 45px; background: var(--bg-input); border-radius: 6px; display: flex; align-items: center; justify-content: center; margin: 0 auto;\\'><i class=\\'fas fa-image\\'></i></div>'">`;
                         }
+                        return imgHtml;
                     }
-                    return imgHtml;
-                }},
+                },
                 { title: 'TÊN HÀNG', key: 'ten_hang' },
-                { title: 'MÃ SỐ', key: 'ma_so', width: '150px' },
-                { title: 'LOẠI VẬT TƯ', key: 'loai_vat_tu', align: 'center', render: (val) => {
-                    if (val === 'Vật tư tiêu hao') return '<span class="badge" style="background: var(--info);">Tiêu hao</span>';
-                    if (val === 'Vật tư dự phòng') return '<span class="badge" style="background: var(--warning);">Dự phòng</span>';
-                    if (val === 'Công cụ dụng cụ') return '<span class="badge" style="background: var(--primary);">Công cụ</span>';
-                    return val || '---';
-                }},
+                { title: 'MÃ SỐ', key: 'ma_so', width: '10px' },
+                {
+                    title: 'LOẠI VẬT TƯ', key: 'loai_vat_tu', align: 'center', render: (val) => {
+                        if (val === 'Vật tư tiêu hao') return '<span class="badge" style="background: var(--info);">Tiêu hao</span>';
+                        if (val === 'Vật tư dự phòng') return '<span class="badge" style="background: var(--warning);">Dự phòng</span>';
+                        if (val === 'Công cụ dụng cụ') return '<span class="badge" style="background: var(--primary);">Công cụ</span>';
+                        return val || '---';
+                    }
+                },
                 { title: 'VỊ TRÍ', key: 'vi_tri' },
                 { title: 'ĐVT', key: 'don_vi_tinh', align: 'center' },
                 { title: 'TỒN ĐẦU', key: 'ton_dau', align: 'right', render: (val) => utils.formatNumber(val) },
                 { title: 'NHẬP', key: 'tong_nhap', align: 'right', render: (val) => utils.formatNumber(val) },
                 { title: 'XUẤT', key: 'tong_xuat', align: 'right', render: (val) => utils.formatNumber(val) },
-                { title: 'TỒN CUỐI', key: 'ton_cuoi', align: 'right', render: (val, row) => {
-                    const isLow = (val <= row.dinh_muc && row.dinh_muc > 0) || val === 0;
-                    return `<b class="${isLow ? 'text-danger' : ''}">${utils.formatNumber(val)}</b>`;
-                }},
+                {
+                    title: 'TỒN CUỐI', key: 'ton_cuoi', align: 'right', render: (val, row) => {
+                        const isLow = (val <= row.dinh_muc && row.dinh_muc > 0) || val === 0;
+                        return `<b class="${isLow ? 'text-danger' : ''}">${utils.formatNumber(val)}</b>`;
+                    }
+                },
                 { title: 'ĐỊNH MỨC', key: 'dinh_muc', align: 'right', render: (val) => utils.formatNumber(val) },
                 { title: 'TRẠNG THÁI', key: 'trang_thai', render: (val) => val === 'Có kiểm kê' ? '<span class="text-success"><i class="fas fa-check-circle"></i> Có</span>' : '<span class="text-muted">Không</span>' },
                 { title: 'CÔNG ĐOẠN', key: 'cong_doan' },
@@ -127,19 +133,19 @@ const InventoryPage = {
         const clearSearch = document.getElementById('clearInventorySearch');
         const dropdown = document.getElementById('inventorySearchDropdown');
         let currentFocus = -1;
-        
+
         const debouncedSearch = utils.debounce(async (value) => {
             this.params.search = value;
             this.params.page = 1;
             this.loadData();
-            
+
             // Autocomplete logic
             currentFocus = -1;
             if (value.length < 2) {
                 if (dropdown) dropdown.classList.remove('show');
                 return;
             }
-            
+
             try {
                 if (!this.autocompleteItems) this.autocompleteItems = [];
                 this.autocompleteItems = await api.inventory.getAll(value);
@@ -186,7 +192,7 @@ const InventoryPage = {
             currentFocus = -1;
             this.loadData();
         });
-        
+
         // Click outside to close dropdown
         document.addEventListener('click', (e) => {
             if (dropdown && e.target !== searchInput && !dropdown.contains(e.target)) {
@@ -236,7 +242,7 @@ const InventoryPage = {
             document.getElementById('filterLowStock').value = '';
             document.getElementById('filterStatus').value = '';
             document.getElementById('filterLoaiVatTu').value = '';
-            
+
             // Reset params
             this.params = {
                 page: 1,
@@ -245,7 +251,7 @@ const InventoryPage = {
                 sort_by: this.params.sort_by,
                 sort_dir: this.params.sort_dir
             };
-            
+
             this.loadData();
             if (window.toast) window.toast.success('Đã làm mới dữ liệu');
         });
@@ -262,12 +268,12 @@ const InventoryPage = {
                     headers: { 'Authorization': 'Bearer ' + window.Auth.token }
                 });
                 if (!response.ok) throw new Error("Lỗi khi xuất file Excel");
-                
+
                 const blob = await response.blob();
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                const dateStr = new Date().toISOString().slice(0,10).replace(/-/g, '');
+                const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
                 a.download = `TonKho_${dateStr}.xlsx`;
                 document.body.appendChild(a);
                 a.click();
@@ -300,7 +306,7 @@ const InventoryPage = {
     renderDropdown(items) {
         const dropdown = document.getElementById('inventorySearchDropdown');
         if (!dropdown) return;
-        
+
         if (items.length === 0) {
             dropdown.innerHTML = '<div class="p-2 text-muted text-center">Không tìm thấy mặt hàng</div>';
         } else {
@@ -313,7 +319,7 @@ const InventoryPage = {
         }
         dropdown.classList.add('show');
     },
-    
+
     selectItem(id) {
         if (!this.autocompleteItems) return;
         const item = this.autocompleteItems.find(i => i.id === id);
@@ -322,10 +328,10 @@ const InventoryPage = {
             searchInput.value = item.ten_hang;
             this.params.search = item.ten_hang;
             this.params.page = 1;
-            
+
             document.getElementById('inventorySearchDropdown').classList.remove('show');
             document.getElementById('clearInventorySearch').style.display = 'block';
-            
+
             this.loadData();
         }
     },
@@ -345,7 +351,7 @@ const InventoryPage = {
             try {
                 images = JSON.parse(item.hinh_anh);
                 if (!Array.isArray(images)) images = [item.hinh_anh];
-            } catch(e) {
+            } catch (e) {
                 images = [item.hinh_anh];
             }
         }
@@ -362,7 +368,7 @@ const InventoryPage = {
             } else {
                 gridStyles = 'grid-template-columns: repeat(3, 1fr); grid-auto-rows: 70px; align-content: start;';
             }
-            
+
             imagesHtml = `<div style="display: grid; ${gridStyles} gap: 8px; width: 100%; height: 100%; overflow-y: auto;">`;
             images.forEach(img => {
                 imagesHtml += InventoryPage.generateThumbnailHtml(img);
@@ -440,7 +446,7 @@ const InventoryPage = {
             buttons: [
                 {
                     text: '<i class="fas fa-trash"></i> Xóa',
-                    class: 'btn-danger me-auto',
+                    class: 'btn-ghost me-auto',
                     onClick: (modal) => {
                         window.modal.hide();
                         window.modal.confirmDelete('Xác nhận xóa', `Bạn có chắc muốn xóa sản phẩm <b>${item.ten_hang}</b> không?`, async () => {
@@ -456,7 +462,7 @@ const InventoryPage = {
                 },
                 {
                     text: '<i class="fas fa-edit"></i> Sửa',
-                    class: 'btn-warning',
+                    class: 'btn-ghost',
                     onClick: (modal) => {
                         window.modal.hide();
                         this.showEditItemForm(item);
@@ -465,7 +471,7 @@ const InventoryPage = {
                 { text: 'Đóng', class: 'btn-ghost text-muted', close: true },
                 {
                     text: '<i class="fas fa-save"></i> Lưu Thông Số',
-                    class: 'btn-primary',
+                    class: 'btn-ghost',
                     onClick: async (modal) => {
                         try {
                             const newSpecs = document.getElementById('itemSpecs').value.trim();
@@ -474,7 +480,7 @@ const InventoryPage = {
                                 ...item,
                                 thong_so_ky_thuat: newSpecs
                             });
-                            
+
                             window.toast.success('Đã lưu thông số kỹ thuật');
                             this.loadData(); // Refresh table
                             window.modal.hide();
@@ -493,19 +499,19 @@ const InventoryPage = {
                 fileInput.addEventListener('change', async (e) => {
                     if (!e.target.files || e.target.files.length === 0) return;
                     const file = e.target.files[0];
-                    
+
                     const progress = document.getElementById('uploadProgress');
                     progress.style.display = 'block';
-                    
+
                     try {
                         const res = await api.inventory.uploadImage(item.id, file);
                         window.toast.success('Tải ảnh lên thành công');
-                        
+
                         // Cập nhật lại UI ngay lập tức
                         if (res.images && res.images.length > 0) {
                             item.hinh_anh = JSON.stringify(res.images);
                             const imgContainer = document.getElementById('imageGalleryContainer');
-                            
+
                             let imagesHtml = '';
                             if (res.images.length > 0) {
                                 let gridStyles = '';
@@ -518,17 +524,17 @@ const InventoryPage = {
                                 } else {
                                     gridStyles = 'grid-template-columns: repeat(3, 1fr); grid-auto-rows: 70px; align-content: start;';
                                 }
-                                
+
                                 imagesHtml = `<div style="display: grid; ${gridStyles} gap: 8px; width: 100%; height: 100%; overflow-y: auto;">`;
                                 res.images.forEach(img => {
                                     imagesHtml += InventoryPage.generateThumbnailHtml(img);
                                 });
                                 imagesHtml += `</div>`;
-                                
+
                                 imgContainer.innerHTML = imagesHtml;
                             }
                         }
-                        
+
                         // Refresh data in background
                         this.loadData();
                     } catch (error) {
@@ -625,22 +631,22 @@ const InventoryPage = {
                     onClick: async (modal) => {
                         const form = document.getElementById('editItemForm');
                         if (!form.reportValidity()) return;
-                        
+
                         const formData = new FormData(form);
                         const updateData = Object.fromEntries(formData.entries());
                         updateData.dinh_muc = parseInt(updateData.dinh_muc) || 0;
                         updateData.don_gia = parseFloat(updateData.don_gia) || 0;
-                        
+
                         try {
                             await api.inventory.update(item.id, {
                                 ...item,
                                 ...updateData
                             });
-                            
+
                             window.toast.success('Đã cập nhật sản phẩm');
                             this.loadData();
                             window.modal.hide();
-                            
+
                             // Re-open item details
                             setTimeout(() => {
                                 api.inventory.get(item.id).then(updatedItem => {
@@ -689,7 +695,7 @@ const InventoryPage = {
             if (clearBtn) {
                 clearBtn.style.display = val ? 'block' : 'none';
             }
-            
+
             const lowerVal = val.toLowerCase();
             currentFocus = -1;
             if (!lowerVal) {
@@ -778,11 +784,11 @@ const InventoryPage = {
             lightbox = document.createElement('div');
             lightbox.id = 'inventoryLightbox';
             lightbox.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: flex; justify-content: center; align-items: center; z-index: 9999999;';
-            
+
             const img = document.createElement('img');
             img.id = 'inventoryLightboxImg';
             img.style.cssText = 'max-width: 90%; max-height: 90%; object-fit: contain; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); user-select: none;';
-            
+
             // Add navigation buttons
             const prevBtn = document.createElement('div');
             prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
@@ -820,12 +826,12 @@ const InventoryPage = {
             lightbox.appendChild(nextBtn);
             lightbox.appendChild(deleteBtn);
             lightbox.appendChild(closeBtn);
-            
+
             // Close on background click
-            lightbox.onclick = function(e) {
+            lightbox.onclick = function (e) {
                 if (e.target === lightbox) InventoryPage.closeLightbox();
             };
-            
+
             document.body.appendChild(lightbox);
 
             // Handle keyboard navigation globally
@@ -838,7 +844,7 @@ const InventoryPage = {
                 }
             });
         }
-        
+
         this.updateLightboxImage();
         lightbox.style.display = 'flex';
     },
@@ -872,7 +878,7 @@ const InventoryPage = {
 
     deleteImage(imgSrc) {
         if (!this.currentItem) return;
-        
+
         window.modal.confirmDelete('Xác nhận xóa ảnh', 'Bạn có chắc muốn xóa ảnh này khỏi sản phẩm không?', async () => {
             try {
                 let images = [];
@@ -880,23 +886,23 @@ const InventoryPage = {
                     try {
                         images = JSON.parse(this.currentItem.hinh_anh);
                         if (!Array.isArray(images)) images = [this.currentItem.hinh_anh];
-                    } catch(e) {
+                    } catch (e) {
                         images = [this.currentItem.hinh_anh];
                     }
                 }
-                
+
                 // Remove matching image (comparing ends to handle relative vs absolute URL mismatches)
                 images = images.filter(img => !imgSrc.endsWith(img) && !img.endsWith(imgSrc));
-                
+
                 const newHinhAnhStr = images.length > 0 ? JSON.stringify(images) : '';
-                
+
                 await api.inventory.update(this.currentItem.id, {
                     ...this.currentItem,
                     hinh_anh: newHinhAnhStr
                 });
-                
+
                 window.toast.success('Đã xóa ảnh thành công');
-                
+
                 this.loadData();
                 setTimeout(() => {
                     api.inventory.get(this.currentItem.id).then(updatedItem => {
@@ -920,5 +926,5 @@ const InventoryPage = {
         `;
     },
 
-    destroy() {}
+    destroy() { }
 };

@@ -21,8 +21,10 @@ class DataTable {
     }
 
     render() {
+        const paginationHtml = this.options.pagination ? this._renderPagination() : '';
         const tableHtml = `
             <div class="table-container">
+                ${paginationHtml}
                 <table class="data-table">
                     <thead>
                         <tr>
@@ -33,7 +35,7 @@ class DataTable {
                         ${this._renderBody()}
                     </tbody>
                 </table>
-                ${this.options.pagination ? this._renderPagination() : ''}
+                ${paginationHtml}
             </div>
         `;
         this.container.innerHTML = tableHtml;

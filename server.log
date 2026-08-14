@@ -1,0 +1,443 @@
+INFO:     Started server process [19436]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8888 (Press CTRL+C to quit)
+Database initialized
+Email scheduler started
+WMS Server is running!
+INFO:     127.0.0.1:53979 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53979 - "GET /css/styles.css?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64102 - "GET /js/utils.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53979 - "GET /js/api.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64102 - "GET /js/components/toast.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53979 - "GET /js/components/modal.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64102 - "GET /js/components/window.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53979 - "GET /js/components/table.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64102 - "GET /js/components/charts.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:53979 - "GET /js/pages/dashboard.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64102 - "GET /js/pages/inventory.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53979 - "GET /js/pages/history.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64102 - "GET /js/pages/receipts.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53979 - "GET /js/pages/issues.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64102 - "GET /js/pages/categories.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53979 - "GET /js/pages/reports.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64102 - "GET /js/pages/users.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64102 - "GET /js/pages/warehouses.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53979 - "GET /js/pages/settings.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:64102 - "GET /js/auth.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53979 - "GET /js/pages/transfers.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64102 - "GET /js/app.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52882 - "OPTIONS /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62559 - "OPTIONS /api/items?page=1&page_size=50&search=&sort_by=id&sort_dir=asc&kho_id=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52882 - "GET /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62559 - "GET /api/items?page=1&page_size=50&search=&sort_by=id&sort_dir=asc&kho_id=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64102 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:64102 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64102 - "GET /js/components/charts.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:53979 - "GET /js/pages/settings.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:62559 - "OPTIONS /api/users/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52882 - "GET /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62559 - "GET /api/users/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54016 - "OPTIONS /api/items?page=1&page_size=50&search=&sort_by=id&sort_dir=asc&kho_id=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54016 - "GET /api/items?page=1&page_size=50&search=&sort_by=id&sort_dir=asc&kho_id=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54016 - "OPTIONS /api/receipts?page=1&page_size=50&kho_id=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54016 - "GET /api/receipts?page=1&page_size=50&kho_id=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54016 - "OPTIONS /api/items/all?search=&kho_id=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54016 - "GET /api/items/all?search=&kho_id=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54016 - "OPTIONS /api/transactions?page=1&page_size=50&kho_id=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54016 - "GET /api/transactions?page=1&page_size=50&kho_id=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54016 - "GET /api/receipts?page=1&page_size=50&kho_id=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54016 - "OPTIONS /api/issues?page=1&page_size=50&kho_id=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54016 - "GET /api/issues?page=1&page_size=50&kho_id=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54016 - "GET /api/items/all?search=&kho_id=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54016 - "OPTIONS /api/categories HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54016 - "GET /api/categories HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54016 - "OPTIONS /api/transfers HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54016 - "GET /api/transfers HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54016 - "OPTIONS /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54016 - "GET /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54016 - "GET /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50354 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50354 - "GET /js/components/charts.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:53992 - "GET /js/pages/settings.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:50354 - "GET /js/app.js?v=2 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:58892 - "OPTIONS /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58892 - "GET /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50621 - "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:50621 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50621 - "GET /css/styles.css?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50621 - "GET /js/utils.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50621 - "GET /js/api.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50621 - "GET /js/components/toast.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50621 - "GET /js/components/modal.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50621 - "GET /js/components/window.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50621 - "GET /js/components/table.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50621 - "GET /js/components/charts.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:50621 - "GET /js/pages/dashboard.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50621 - "GET /js/pages/inventory.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50621 - "GET /js/pages/history.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50621 - "GET /js/pages/receipts.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50621 - "GET /js/pages/issues.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50621 - "GET /js/pages/categories.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50621 - "GET /js/pages/reports.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50621 - "GET /js/pages/users.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50621 - "GET /js/pages/settings.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:50621 - "GET /js/pages/warehouses.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50621 - "GET /js/pages/transfers.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50621 - "GET /js/auth.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50621 - "GET /js/app.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50621 - "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:50190 - "OPTIONS /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50190 - "GET /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50621 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:56864 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56864 - "GET /js/components/charts.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:56326 - "GET /js/pages/settings.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:52481 - "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:49674 - "GET /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51645 - "OPTIONS /api/items?page=1&page_size=50&search=&sort_by=id&sort_dir=asc&kho_id=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51645 - "GET /api/items?page=1&page_size=50&search=&sort_by=id&sort_dir=asc&kho_id=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51645 - "OPTIONS /api/transactions?page=1&page_size=50&kho_id=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51645 - "GET /api/transactions?page=1&page_size=50&kho_id=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62671 - "OPTIONS /api/receipts?page=1&page_size=50&kho_id=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62671 - "GET /api/receipts?page=1&page_size=50&kho_id=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62671 - "OPTIONS /api/items/all?search=&kho_id=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62671 - "GET /api/items/all?search=&kho_id=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61370 - "OPTIONS /api/receipts?page=1&page_size=50&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61370 - "GET /api/receipts?page=1&page_size=50&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61370 - "OPTIONS /api/items/all?search=&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61370 - "GET /api/items/all?search=&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61370 - "OPTIONS /api/items?page=1&page_size=50&search=&sort_by=id&sort_dir=asc&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61370 - "GET /api/items?page=1&page_size=50&search=&sort_by=id&sort_dir=asc&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61458 - "GET /uploads/items/2dcd6d2c7c834f1489829db9d05fcc86.png HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61779 - "GET /uploads/items/7e3d60738d7446d2b733fba562a6f209.png HTTP/1.1" 200 OK
+[2026-08-14 09:59:40.536407] Automatically sent warning email for warehouse ID 1
+[2026-08-14 09:59:40.536407] DB Updated to 2026-08-14 for warehouse ID 1
+[2026-08-14 09:59:40.536407] Automatically sent warning email for warehouse ID 2
+[2026-08-14 09:59:40.536407] DB Updated to 2026-08-14 for warehouse ID 2
+INFO:     127.0.0.1:56663 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56663 - "GET /css/styles.css?v=2 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:63969 - "GET /js/utils.js?v=2 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:56663 - "GET /js/api.js?v=2 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:63969 - "GET /js/components/modal.js?v=2 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:56663 - "GET /js/components/charts.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:63969 - "GET /js/pages/inventory.js?v=2 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:63969 - "GET /js/pages/history.js?v=2 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:56663 - "GET /js/pages/receipts.js?v=2 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:63969 - "GET /js/pages/issues.js?v=2 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:56663 - "GET /js/pages/categories.js?v=2 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:63969 - "GET /js/pages/users.js?v=2 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:56663 - "GET /js/pages/settings.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:63969 - "GET /js/pages/warehouses.js?v=2 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:56663 - "GET /js/pages/transfers.js?v=2 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:63969 - "GET /js/auth.js?v=2 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:56663 - "GET /js/app.js?v=2 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:65060 - "OPTIONS /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59539 - "OPTIONS /api/items?page=1&page_size=50&search=&sort_by=id&sort_dir=asc&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65060 - "GET /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59539 - "GET /api/items?page=1&page_size=50&search=&sort_by=id&sort_dir=asc&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58810 - "OPTIONS /api/items/1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58810 - "PUT /api/items/1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58810 - "GET /api/items?page=1&page_size=50&search=&sort_by=id&sort_dir=asc&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58810 - "GET /api/items/1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60692 - "PUT /api/items/1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60692 - "GET /api/items?page=1&page_size=50&search=&sort_by=id&sort_dir=asc&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62887 - "OPTIONS /api/transactions?page=1&page_size=50&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62887 - "GET /api/transactions?page=1&page_size=50&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49220 - "OPTIONS /api/receipts?page=1&page_size=50&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49220 - "GET /api/receipts?page=1&page_size=50&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49220 - "OPTIONS /api/items/all?search=&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49220 - "GET /api/items/all?search=&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49220 - "OPTIONS /api/issues?page=1&page_size=50&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49220 - "GET /api/issues?page=1&page_size=50&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49220 - "GET /api/items/all?search=&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49220 - "OPTIONS /api/categories HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49220 - "GET /api/categories HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53741 - "GET /api/items?page=1&page_size=50&search=&sort_by=id&sort_dir=asc&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51577 - "GET /js/components/charts.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:55265 - "GET /js/pages/settings.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:64217 - "OPTIONS /api/transactions?page=1&page_size=50&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64217 - "GET /api/transactions?page=1&page_size=50&kho_id=1 HTTP/1.1" 403 Forbidden
+INFO:     127.0.0.1:64217 - "OPTIONS /api/receipts?page=1&page_size=50&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64217 - "GET /api/receipts?page=1&page_size=50&kho_id=1 HTTP/1.1" 403 Forbidden
+INFO:     127.0.0.1:64217 - "OPTIONS /api/items/all?search=&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64217 - "GET /api/items/all?search=&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64217 - "OPTIONS /api/issues?page=1&page_size=50&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64217 - "GET /api/issues?page=1&page_size=50&kho_id=1 HTTP/1.1" 403 Forbidden
+INFO:     127.0.0.1:64217 - "GET /api/items/all?search=&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59736 - "GET /api/transactions?page=1&page_size=50&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59736 - "GET /api/receipts?page=1&page_size=50&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59736 - "GET /api/issues?page=1&page_size=50&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59736 - "OPTIONS /api/categories HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59736 - "GET /api/categories HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59736 - "GET /api/receipts?page=1&page_size=50&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59736 - "OPTIONS /api/receipts/3 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59736 - "DELETE /api/receipts/3 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59736 - "GET /api/receipts?page=1&page_size=50&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59736 - "OPTIONS /api/receipts/2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59736 - "DELETE /api/receipts/2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59736 - "GET /api/receipts?page=1&page_size=50&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59736 - "OPTIONS /api/receipts/1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59736 - "DELETE /api/receipts/1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59736 - "GET /api/receipts?page=1&page_size=50&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59736 - "GET /api/issues?page=1&page_size=50&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59736 - "OPTIONS /api/issues/2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59736 - "DELETE /api/issues/2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59736 - "GET /api/issues?page=1&page_size=50&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59736 - "OPTIONS /api/issues/1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59736 - "DELETE /api/issues/1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59736 - "GET /api/issues?page=1&page_size=50&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59321 - "GET /api/receipts?page=1&page_size=50&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59321 - "GET /api/transactions?page=1&page_size=50&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62085 - "OPTIONS /api/transactions/174 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62085 - "DELETE /api/transactions/174 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62085 - "GET /api/transactions?page=1&page_size=50&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54188 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54188 - "GET /js/components/charts.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:54656 - "GET /js/pages/settings.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:58767 - "OPTIONS /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58767 - "GET /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55305 - "GET /api/transactions?page=1&page_size=50&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55305 - "OPTIONS /api/items?page=1&page_size=50&search=&sort_by=id&sort_dir=asc&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55305 - "GET /api/items?page=1&page_size=50&search=&sort_by=id&sort_dir=asc&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55305 - "GET /api/transactions?page=1&page_size=50&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55305 - "GET /api/receipts?page=1&page_size=50&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55305 - "GET /api/items/all?search=&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55305 - "GET /api/issues?page=1&page_size=50&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55305 - "GET /api/items/all?search=&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64113 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64113 - "GET /js/components/charts.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:60850 - "GET /js/pages/settings.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:62294 - "GET /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61677 - "GET /api/issues?page=1&page_size=50&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61677 - "GET /api/items/all?search=&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61677 - "GET /api/receipts?page=1&page_size=50&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61677 - "GET /api/items/all?search=&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61677 - "GET /api/transactions?page=1&page_size=50&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55192 - "GET /api/items?page=1&page_size=50&search=&sort_by=id&sort_dir=asc&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57840 - "GET /api/transactions?page=1&page_size=50&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57840 - "OPTIONS /api/transactions?page=1&page_size=50&kho_id=1&loai=NHAP HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57840 - "GET /api/transactions?page=1&page_size=50&kho_id=1&loai=NHAP HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57840 - "OPTIONS /api/transactions?page=1&page_size=50&kho_id=1&loai=XUAT HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57840 - "GET /api/transactions?page=1&page_size=50&kho_id=1&loai=XUAT HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59258 - "GET /api/items?page=1&page_size=50&search=&sort_by=id&sort_dir=asc&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59258 - "OPTIONS /api/reports/dashboard?kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59258 - "GET /api/reports/dashboard?kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56441 - "GET /api/items?page=1&page_size=50&search=&sort_by=id&sort_dir=asc&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62047 - "OPTIONS /api/items?page=1&page_size=50&search=&sort_by=id&sort_dir=asc&kho_id=1&loai_vat_tu=V%E1%BA%ADt+t%C6%B0+ti%C3%AAu+hao HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62047 - "GET /api/items?page=1&page_size=50&search=&sort_by=id&sort_dir=asc&kho_id=1&loai_vat_tu=V%E1%BA%ADt+t%C6%B0+ti%C3%AAu+hao HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64881 - "OPTIONS /api/items?page=1&page_size=50&search=&sort_by=id&sort_dir=asc&kho_id=1&loai_vat_tu=V%E1%BA%ADt+t%C6%B0+d%E1%BB%B1+ph%C3%B2ng HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64881 - "GET /api/items?page=1&page_size=50&search=&sort_by=id&sort_dir=asc&kho_id=1&loai_vat_tu=V%E1%BA%ADt+t%C6%B0+d%E1%BB%B1+ph%C3%B2ng HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52438 - "GET /api/items?page=1&page_size=50&search=&sort_by=id&sort_dir=asc&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60742 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60742 - "GET /js/components/charts.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:56815 - "GET /js/pages/settings.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:55103 - "GET /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55637 - "GET /api/items?page=1&page_size=50&search=&sort_by=id&sort_dir=asc&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50665 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50665 - "GET /js/components/charts.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:63826 - "GET /js/pages/settings.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:58930 - "OPTIONS /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51805 - "OPTIONS /api/items?page=1&page_size=50&search=&sort_by=id&sort_dir=asc&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51805 - "GET /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58930 - "GET /api/items?page=1&page_size=50&search=&sort_by=id&sort_dir=asc&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63826 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63826 - "GET /js/components/charts.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:50665 - "GET /js/pages/settings.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:58930 - "GET /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51805 - "GET /api/items?page=1&page_size=50&search=&sort_by=id&sort_dir=asc&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64723 - "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:64723 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64723 - "GET /css/styles.css?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64723 - "GET /js/utils.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64723 - "GET /js/api.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64723 - "GET /js/components/toast.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64723 - "GET /js/components/modal.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64723 - "GET /js/components/window.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64723 - "GET /js/components/table.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64723 - "GET /js/components/charts.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:64723 - "GET /js/pages/dashboard.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64723 - "GET /js/pages/inventory.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64723 - "GET /js/pages/history.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64723 - "GET /js/pages/receipts.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64723 - "GET /js/pages/issues.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64723 - "GET /js/pages/categories.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64723 - "GET /js/pages/reports.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64723 - "GET /js/pages/users.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64723 - "GET /js/pages/settings.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:64723 - "GET /js/pages/warehouses.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64723 - "GET /js/pages/transfers.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64723 - "GET /js/auth.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64723 - "GET /js/app.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64723 - "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:56248 - "OPTIONS /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49996 - "OPTIONS /api/items?page=1&page_size=50&search=&sort_by=id&sort_dir=asc&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56248 - "GET /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49996 - "GET /api/items?page=1&page_size=50&search=&sort_by=id&sort_dir=asc&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64723 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:56974 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56974 - "GET /js/components/charts.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:53117 - "GET /js/pages/inventory.js?v=2 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:56974 - "GET /js/pages/settings.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:55200 - "GET /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65399 - "GET /api/items?page=1&page_size=50&search=&sort_by=id&sort_dir=asc&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56974 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53117 - "GET /js/pages/settings.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:56974 - "GET /js/components/charts.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:65399 - "GET /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55200 - "GET /api/items?page=1&page_size=50&search=&sort_by=id&sort_dir=asc&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56974 - "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:56974 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56974 - "GET /css/styles.css?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56974 - "GET /js/utils.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64416 - "GET /js/api.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56974 - "GET /js/components/toast.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64416 - "GET /js/components/modal.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56974 - "GET /js/components/window.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64416 - "GET /js/components/table.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56974 - "GET /js/components/charts.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:64416 - "GET /js/pages/dashboard.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56974 - "GET /js/pages/inventory.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64416 - "GET /js/pages/history.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56974 - "GET /js/pages/receipts.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64416 - "GET /js/pages/issues.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56974 - "GET /js/pages/categories.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56974 - "GET /js/pages/reports.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64416 - "GET /js/pages/users.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56974 - "GET /js/pages/settings.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:64416 - "GET /js/pages/warehouses.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56974 - "GET /js/pages/transfers.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64416 - "GET /js/auth.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56974 - "GET /js/app.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56974 - "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:64446 - "OPTIONS /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64188 - "OPTIONS /api/items?page=1&page_size=50&search=&sort_by=id&sort_dir=asc&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64188 - "GET /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64446 - "GET /api/items?page=1&page_size=50&search=&sort_by=id&sort_dir=asc&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56974 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:58668 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58668 - "GET /js/components/charts.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:63115 - "GET /js/pages/settings.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:63115 - "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:57387 - "GET /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53453 - "GET /api/items?page=1&page_size=50&search=&sort_by=id&sort_dir=asc&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63115 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63115 - "GET /css/styles.css?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58916 - "GET /js/api.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58668 - "GET /js/utils.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64010 - "GET /js/components/toast.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63115 - "GET /js/components/modal.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64010 - "GET /js/components/window.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58668 - "GET /js/components/table.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63115 - "GET /js/pages/dashboard.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58916 - "GET /js/components/charts.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:64010 - "GET /js/pages/inventory.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58668 - "GET /js/pages/history.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58916 - "GET /js/pages/receipts.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63115 - "GET /js/pages/issues.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58916 - "GET /js/pages/categories.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58668 - "GET /js/pages/reports.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64010 - "GET /js/pages/users.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63115 - "GET /js/pages/settings.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:58916 - "GET /js/pages/warehouses.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64010 - "GET /js/auth.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58668 - "GET /js/pages/transfers.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63115 - "GET /js/app.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58916 - "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:53453 - "OPTIONS /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57387 - "OPTIONS /api/items?page=1&page_size=50&search=&sort_by=id&sort_dir=asc&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57387 - "GET /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53453 - "GET /api/items?page=1&page_size=50&search=&sort_by=id&sort_dir=asc&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58668 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:63981 - "OPTIONS /api/items?page=2&page_size=50&search=&sort_by=id&sort_dir=asc&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63981 - "GET /api/items?page=2&page_size=50&search=&sort_by=id&sort_dir=asc&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62651 - "OPTIONS /api/items?page=2&page_size=50&search=&sort_by=id&sort_dir=asc&kho_id=3 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62651 - "GET /api/items?page=2&page_size=50&search=&sort_by=id&sort_dir=asc&kho_id=3 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54248 - "GET /api/items?page=2&page_size=50&search=&sort_by=id&sort_dir=asc&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58761 - "GET /api/items?page=1&page_size=50&search=&sort_by=id&sort_dir=asc&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62453 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62453 - "GET /js/components/charts.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:65468 - "GET /js/pages/inventory.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62453 - "GET /js/pages/settings.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:57068 - "GET /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56953 - "GET /api/items?page=1&page_size=50&search=&sort_by=id&sort_dir=asc&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59686 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59686 - "GET /js/components/charts.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:56209 - "GET /js/pages/inventory.js?v=2 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:56209 - "GET /js/pages/settings.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:55687 - "GET /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64308 - "GET /api/items?page=1&page_size=50&search=&sort_by=id&sort_dir=asc&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56209 - "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:56209 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56209 - "GET /css/styles.css?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58575 - "GET /js/api.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56209 - "GET /js/utils.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58575 - "GET /js/components/toast.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56209 - "GET /js/components/modal.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58575 - "GET /js/components/window.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56209 - "GET /js/components/table.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58575 - "GET /js/components/charts.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:56209 - "GET /js/pages/dashboard.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58575 - "GET /js/pages/inventory.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56209 - "GET /js/pages/history.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58575 - "GET /js/pages/receipts.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56209 - "GET /js/pages/issues.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58575 - "GET /js/pages/categories.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56209 - "GET /js/pages/reports.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58575 - "GET /js/pages/users.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56209 - "GET /js/pages/settings.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:58575 - "GET /js/pages/warehouses.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56209 - "GET /js/pages/transfers.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58575 - "GET /js/auth.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56209 - "GET /js/app.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58575 - "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:61997 - "OPTIONS /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62751 - "OPTIONS /api/items?page=1&page_size=50&search=&sort_by=id&sort_dir=asc&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61997 - "GET /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62751 - "GET /api/items?page=1&page_size=50&search=&sort_by=id&sort_dir=asc&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58575 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:61540 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61540 - "GET /js/components/table.js?v=2 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:56331 - "GET /js/components/charts.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:61540 - "GET /js/pages/inventory.js?v=2 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:56331 - "GET /js/pages/settings.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:49810 - "GET /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57455 - "GET /api/items?page=1&page_size=50&search=&sort_by=id&sort_dir=asc&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63694 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63694 - "GET /js/components/table.js?v=2 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:50683 - "GET /js/components/charts.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:63694 - "GET /js/pages/inventory.js?v=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50683 - "GET /js/pages/settings.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:56158 - "GET /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59246 - "GET /api/items?page=1&page_size=50&search=&sort_by=id&sort_dir=asc&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53002 - "OPTIONS /api/transactions?page=1&page_size=50&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53002 - "GET /api/transactions?page=1&page_size=50&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53002 - "OPTIONS /api/receipts?page=1&page_size=50&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53002 - "GET /api/receipts?page=1&page_size=50&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53002 - "OPTIONS /api/items/all?search=&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53002 - "GET /api/items/all?search=&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53002 - "OPTIONS /api/issues?page=1&page_size=50&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53002 - "GET /api/issues?page=1&page_size=50&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53002 - "GET /api/items/all?search=&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53002 - "OPTIONS /api/categories HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53002 - "GET /api/categories HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53002 - "OPTIONS /api/transfers HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53002 - "GET /api/transfers HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53002 - "GET /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53002 - "GET /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53002 - "OPTIONS /api/users/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53002 - "GET /api/users/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57464 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62844 - "GET /js/pages/inventory.js?v=2 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:57464 - "GET /js/components/charts.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:62844 - "GET /js/pages/settings.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:53002 - "GET /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58269 - "GET /api/users/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50568 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50568 - "GET /js/components/table.js?v=2 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:53441 - "GET /js/components/charts.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:50568 - "GET /js/pages/inventory.js?v=2 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:53441 - "GET /js/pages/settings.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:61160 - "OPTIONS /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61160 - "GET /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53182 - "GET /api/users/ HTTP/1.1" 200 OK
