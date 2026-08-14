@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hướng dẫn sử dụng - SMV Quản lý Kho</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0f172a;
+            --bg-card: #1e293b;
+            --bg-sidebar: #162032;
+            --text: #e2e8f0;
+            --text-muted: #94a3b8;
+            --text-heading: #f1f5f9;
+            --primary: #3b82f6;
+            --primary-light: rgba(59,130,246,0.15);
+            --accent: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --info: #06b6d4;
+            --border: #334155;
+            --code-bg: #0d1117;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar TOC */
+        .sidebar {
+            width: 280px;
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border);
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 100;
+            transition: transform 0.3s;
+        }
+
+        .sidebar-header {
+            padding: 24px 20px 16px;
+            border-bottom: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .sidebar-header .logo {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--accent);
+            text-shadow: 0 0 20px rgba(239,68,68,0.4);
+        }
+
+        .sidebar-header p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-top: 4px;
+        }
+
+        .toc { padding: 16px 0; }
+
+        .toc a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 20px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
+
+        .toc a:hover, .toc a.active {
+            color: var(--primary);
+            background: var(--primary-light);
+            border-left-color: var(--primary);
+        }
+
+        .toc a i { width: 20px; text-align: center; font-size: 0.85rem; }
+
+        /* Main content */
+        .main {
+            margin-left: 280px;
+            flex: 1;
+            max-width: 900px;
+            padding: 40px 50px 80px;
+        }
+
+        /* Header */
+        .page-header {
+            text-align: center;
+            margin-bottom: 50px;
+            padding: 40px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .page-header h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--text-heading);
+            margin-bottom: 10px;
+        }
+
+        .page-header h1 span { color: var(--accent); }
+
+        .page-header .subtitle {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+        }
+
+        /* Sections */
+        .section {
+            margin-bottom: 50px;
+            scroll-margin-top: 30px;
+        }
+
+        .section h2 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--text-heading);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section h2 .num {
+            background: var(--primary);
+            color: #fff;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.95rem;
+            flex-shrink: 0;
+        }
+
+        h3 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: var(--text-heading);
+            margin: 24px 0 12px;
+        }
+
+        h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--info);
+            margin: 16px 0 8px;
+        }
+
+        p { margin-bottom: 12px; }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0 24px;
+            font-size: 0.92rem;
+        }
+
+        th {
+            background: var(--primary);
+            color: #fff;
+            padding: 10px 14px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+        tr:hover td { background: var(--primary-light); }
+
+        /* Lists */
+        ul, ol {
+            margin: 8px 0 16px 24px;
+        }
+
+        li { margin-bottom: 6px; }
+
+        /* Note boxes */
+        .note {
+            background: rgba(59,130,246,0.1);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            border-radius: 0 8px 8px 0;
+            margin: 16px 0;
+            font-size: 0.92rem;
+        }
+
+        .note.warning {
+            background: rgba(245,158,11,0.1);
+            border-left-color: var(--warning);
+        }
+
+        .note.danger {
+            background: rgba(239,68,68,0.1);
+            border-left-color: var(--accent);
+        }
+
+        .note.success {
+            background: rgba(16,185,129,0.1);
+            border-left-color: var(--success);
+        }
+
+        .note strong { color: var(--text-heading); }
+
+        /* Steps */
+        .steps {
+            counter-reset: step;
+            list-style: none;
+            margin-left: 0;
+            padding-left: 0;
+        }
+
+        .steps li {
+            counter-increment: step;
+            position: relative;
+            padding-left: 40px;
+            margin-bottom: 12px;
+        }
+
+        .steps li::before {
+            content: counter(step);
+            position: absolute;
+            left: 0;
+            top: 2px;
+            width: 26px;
+            height: 26px;
+            background: var(--primary);
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        /* Keyboard shortcuts */
+        kbd {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 2px 8px;
+            font-size: 0.85rem;
+            font-family: monospace;
+            color: var(--info);
+        }
+
+        /* Badge */
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .badge-green { background: rgba(16,185,129,0.2); color: #34d399; }
+        .badge-orange { background: rgba(245,158,11,0.2); color: #fbbf24; }
+        .badge-blue { background: rgba(59,130,246,0.2); color: #60a5fa; }
+        .badge-red { background: rgba(239,68,68,0.2); color: #f87171; }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 30px 0;
+            border-top: 1px solid var(--border);
+            margin-top: 50px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .footer a { color: var(--primary); text-decoration: none; }
+
+        /* Mobile toggle */
+        .mobile-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 200;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        /* Print */
+        @media print {
+            .sidebar, .mobile-toggle { display: none !important; }
+            .main { margin-left: 0; max-width: 100%; padding: 20px; }
+            body { background: #fff; color: #000; }
+            .section h2 { color: #000; border-bottom-color: #333; }
+            h3, h4 { color: #333; }
+            th { background: #333; }
+            td { border-color: #ccc; }
+            .note { border-color: #999; background: #f5f5f5; }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .mobile-toggle { display: flex; align-items: center; justify-content: center; }
+            .main { margin-left: 0; padding: 20px 20px 60px; }
+            .page-header h1 { font-size: 1.5rem; }
+            table { font-size: 0.82rem; }
+            th, td { padding: 8px 10px; }
+        }
+
+        /* Scroll to top */
+        .scroll-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 44px;
+            height: 44px;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            font-size: 1.1rem;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 99;
+            box-shadow: 0 4px 15px rgba(59,130,246,0.4);
+        }
+        .scroll-top.show { opacity: 1; }
+    </style>
+</head>
+<body>
+
+<!-- Mobile menu button -->
+<button class="mobile-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">
+    <i class="fas fa-bars"></i>
+</button>
+
+<!-- Sidebar TOC -->
+<aside class="sidebar">
+    <div class="sidebar-header">
+        <div class="logo">SMV</div>
+        <p>Hướng dẫn sử dụng</p>
+    </div>
+    <nav class="toc">
+        <a href="#sec1"><i class="fas fa-sign-in-alt"></i> 1. Đăng nhập</a>
+        <a href="#sec2"><i class="fas fa-desktop"></i> 2. Giao diện chính</a>
+        <a href="#sec3"><i class="fas fa-chart-pie"></i> 3. Tổng quan</a>
+        <a href="#sec4"><i class="fas fa-boxes-stacked"></i> 4. Tồn kho</a>
+        <a href="#sec5"><i class="fas fa-history"></i> 5. Lịch sử nhập xuất</a>
+        <a href="#sec6"><i class="fas fa-file-import"></i> 6. Phiếu nhập kho</a>
+        <a href="#sec7"><i class="fas fa-file-export"></i> 7. Phiếu xuất kho</a>
+        <a href="#sec8"><i class="fas fa-tags"></i> 8. Danh mục</a>
+        <a href="#sec9"><i class="fas fa-exchange-alt"></i> 9. Chuyển kho</a>
+        <a href="#sec10"><i class="fas fa-file-excel"></i> 10. Báo cáo</a>
+        <a href="#sec11"><i class="fas fa-key"></i> 11. Đổi mật khẩu</a>
+        <a href="#sec12"><i class="fas fa-lightbulb"></i> 12. Mẹo sử dụng</a>
+    </nav>
+</aside>
+
+<!-- Main Content -->
+<div class="main">
+
+    <div class="page-header">
+        <h1>📘 HƯỚNG DẪN SỬ DỤNG<br><span>HỆ THỐNG QUẢN LÝ KHO SMV</span></h1>
+        <p class="subtitle">Tài liệu dành cho người dùng — Phiên bản 1.0 — Tháng 08/2026</p>
+    </div>
+
+    <!-- SECTION 1 -->
+    <div class="section" id="sec1">
+        <h2><span class="num">1</span> ĐĂNG NHẬP HỆ THỐNG</h2>
+
+        <h3>1.1. Truy cập hệ thống</h3>
+        <ul>
+            <li>Mở trình duyệt web (Chrome, Edge, Firefox...).</li>
+            <li>Nhập địa chỉ: <strong>http://localhost:8888</strong> (nếu dùng cùng máy chạy server) hoặc <strong>http://[IP_máy_chủ]:8888</strong> (truy cập từ máy khác trong cùng mạng LAN).</li>
+        </ul>
+
+        <h3>1.2. Thao tác đăng nhập</h3>
+        <ol class="steps">
+            <li>Nhập <strong>Tên đăng nhập</strong> vào ô đầu tiên.</li>
+            <li>Nhập <strong>Mật khẩu</strong> vào ô thứ hai. Nhấn biểu tượng <i class="fas fa-eye"></i> để hiện/ẩn mật khẩu.</li>
+            <li>Nhấn nút <strong>Đăng nhập</strong> hoặc nhấn phím <kbd>Enter</kbd>.</li>
+        </ol>
+
+        <div class="note">
+            <strong>💡 Lưu ý:</strong> Nếu quên mật khẩu, nhấn vào liên kết <em>"Quên mật khẩu?"</em> và liên hệ quản trị viên. Tài khoản có thể bị giới hạn quyền tùy theo phân quyền.
+        </div>
+    </div>
+
+    <!-- SECTION 2 -->
+    <div class="section" id="sec2">
+        <h2><span class="num">2</span> GIAO DIỆN CHÍNH</h2>
+
+        <h3>2.1. Thanh bên trái (Sidebar)</h3>
+        <p>Đây là menu điều hướng chính:</p>
+        <table>
+            <thead><tr><th>Biểu tượng</th><th>Tên menu</th><th>Chức năng</th></tr></thead>
+            <tbody>
+                <tr><td><i class="fas fa-chart-pie"></i></td><td><strong>Tổng quan</strong></td><td>Xem thống kê tổng hợp, biểu đồ, cảnh báo</td></tr>
+                <tr><td><i class="fas fa-boxes-stacked"></i></td><td><strong>Tồn kho</strong></td><td>Xem danh sách vật tư và số lượng tồn kho</td></tr>
+                <tr><td><i class="fas fa-history"></i></td><td><strong>Lịch sử nhập xuất</strong></td><td>Tra cứu lịch sử tất cả giao dịch</td></tr>
+                <tr><td><i class="fas fa-file-import"></i></td><td><strong>Phiếu nhập kho</strong></td><td>Tạo và quản lý phiếu nhập kho</td></tr>
+                <tr><td><i class="fas fa-file-export"></i></td><td><strong>Phiếu xuất kho</strong></td><td>Tạo và quản lý phiếu xuất kho</td></tr>
+                <tr><td><i class="fas fa-tags"></i></td><td><strong>Danh mục</strong></td><td>Quản lý công đoạn, nhân viên, ĐVT...</td></tr>
+                <tr><td><i class="fas fa-exchange-alt"></i></td><td><strong>Chuyển kho</strong></td><td>Chuyển vật tư giữa các kho</td></tr>
+                <tr><td><i class="fas fa-file-excel"></i></td><td><strong>Báo cáo</strong></td><td>Xem và xuất báo cáo</td></tr>
+            </tbody>
+        </table>
+
+        <h3>2.2. Thanh trên cùng (Topbar)</h3>
+        <ul>
+            <li><strong>Chọn kho:</strong> Dropdown cho phép chuyển đổi giữa các kho. Tất cả dữ liệu sẽ thay đổi theo kho được chọn.</li>
+            <li><strong>Chế độ Sáng/Tối:</strong> Nhấn <i class="fas fa-sun"></i> / <i class="fas fa-moon"></i> để chuyển đổi.</li>
+            <li><strong>Đồng hồ:</strong> Hiển thị ngày giờ hiện tại.</li>
+        </ul>
+    </div>
+
+    <!-- SECTION 3 -->
+    <div class="section" id="sec3">
+        <h2><span class="num">3</span> TỔNG QUAN (Dashboard)</h2>
+
+        <h3>3.1. Thẻ KPI (4 ô thống kê nhanh)</h3>
+        <table>
+            <thead><tr><th>Thẻ</th><th>Ý nghĩa</th></tr></thead>
+            <tbody>
+                <tr><td><span class="badge badge-blue">Tổng mặt hàng</span></td><td>Số lượng loại vật tư đang quản lý</td></tr>
+                <tr><td><span class="badge badge-green">Nhập trong ngày</span></td><td>Tổng số lượng vật tư đã nhập hôm nay</td></tr>
+                <tr><td><span class="badge badge-orange">Xuất trong ngày</span></td><td>Tổng số lượng vật tư đã xuất hôm nay</td></tr>
+                <tr><td><span class="badge badge-red">Cảnh báo tồn kho</span></td><td>Số mặt hàng có tồn kho dưới định mức. <strong>Nhấn vào</strong> để xem chi tiết</td></tr>
+            </tbody>
+        </table>
+
+        <h3>3.2. Biểu đồ xu hướng</h3>
+        <p>Biểu đồ đường thể hiện xu hướng <strong>Nhập/Xuất</strong> trong 6 tháng gần nhất, giúp nắm bắt tình hình biến động.</p>
+
+        <h3>3.3. Giao dịch mới nhất</h3>
+        <p>Danh sách các giao dịch nhập/xuất gần nhất với thông tin: Tên hàng, Loại, Ngày, Người thực hiện, Số lượng.</p>
+    </div>
+
+    <!-- SECTION 4 -->
+    <div class="section" id="sec4">
+        <h2><span class="num">4</span> TỒN KHO</h2>
+
+        <h3>4.1. Thanh công cụ lọc & tìm kiếm</h3>
+        <ul>
+            <li><strong>Ô tìm kiếm:</strong> Gõ tên hoặc mã số vật tư (từ 2 ký tự trở lên sẽ có gợi ý tự động).</li>
+            <li><strong>Từ - Đến:</strong> Lọc theo khoảng thời gian.</li>
+            <li><strong>Lọc trạng thái tồn:</strong> Chọn "Dưới định mức" để xem mặt hàng cần bổ sung.</li>
+            <li><strong>Lọc loại vật tư:</strong> Tiêu hao / Dự phòng / Công cụ dụng cụ.</li>
+            <li><strong>Lọc kiểm kê:</strong> Có / Không kiểm kê.</li>
+            <li><strong>Nút <i class="fas fa-sync-alt"></i>:</strong> Làm mới, xóa tất cả bộ lọc.</li>
+            <li><strong>Nút Xuất Excel:</strong> Tải xuống file Excel (.xlsx).</li>
+        </ul>
+
+        <h3>4.2. Bảng danh sách vật tư</h3>
+        <table>
+            <thead><tr><th>Cột</th><th>Mô tả</th></tr></thead>
+            <tbody>
+                <tr><td>STT</td><td>Số thứ tự</td></tr>
+                <tr><td>Hình ảnh</td><td>Ảnh minh họa vật tư</td></tr>
+                <tr><td>Tên hàng</td><td>Tên đầy đủ của vật tư</td></tr>
+                <tr><td>Mã số</td><td>Mã sản phẩm / Part number</td></tr>
+                <tr><td>Loại vật tư</td><td>Tiêu hao / Dự phòng / Công cụ</td></tr>
+                <tr><td>Vị trí</td><td>Vị trí lưu trữ trong kho</td></tr>
+                <tr><td>ĐVT</td><td>Đơn vị tính (Pcs, Roll, Set...)</td></tr>
+                <tr><td>Tồn đầu / Nhập / Xuất</td><td>Số lượng đầu kỳ, tổng nhập, tổng xuất</td></tr>
+                <tr><td><strong>Tồn cuối</strong></td><td>Số lượng hiện tại (<strong style="color:#ef4444;">số đỏ</strong> = dưới định mức)</td></tr>
+                <tr><td>Định mức</td><td>Mức tối thiểu cần duy trì</td></tr>
+                <tr><td>Trạng thái</td><td>Có / Không kiểm kê</td></tr>
+                <tr><td>Công đoạn</td><td>Công đoạn sử dụng</td></tr>
+            </tbody>
+        </table>
+
+        <h3>4.3. Sắp xếp & Phân trang</h3>
+        <ul>
+            <li>Nhấn vào <strong>tiêu đề cột</strong> để sắp xếp tăng/giảm dần.</li>
+            <li>Thanh phân trang hiển thị ở <strong>cả đầu và cuối bảng</strong>.</li>
+        </ul>
+
+        <h3>4.4. Xem chi tiết sản phẩm</h3>
+        <p>Nhấn vào <strong>bất kỳ dòng nào</strong> để mở cửa sổ chi tiết:</p>
+        <ul>
+            <li><strong>Hình ảnh:</strong> Xem ảnh, phóng to (Lightbox), tải ảnh mới lên.</li>
+            <li><strong>Thông tin:</strong> Tên, Mã số, NCC, Vị trí, Loại vật tư, Tồn kho, Đơn giá.</li>
+            <li><strong>Thông số kỹ thuật:</strong> Nhập/sửa thông số → nhấn <strong>"Lưu Thông Số"</strong>.</li>
+            <li><strong>Nút Sửa:</strong> Chỉnh sửa tên, mã, ĐVT, vị trí, loại vật tư...</li>
+            <li><strong>Nút Xóa:</strong> Xóa vật tư (cần có quyền).</li>
+        </ul>
+    </div>
+
+    <!-- SECTION 5 -->
+    <div class="section" id="sec5">
+        <h2><span class="num">5</span> LỊCH SỬ NHẬP XUẤT KHO</h2>
+
+        <h3>5.1. Tab lọc theo loại</h3>
+        <ul>
+            <li><strong>Tất cả:</strong> Toàn bộ giao dịch nhập + xuất.</li>
+            <li><strong>Lịch sử nhập:</strong> Chỉ giao dịch nhập.</li>
+            <li><strong>Lịch sử xuất:</strong> Chỉ giao dịch xuất.</li>
+        </ul>
+
+        <h3>5.2. Thanh công cụ</h3>
+        <ul>
+            <li><strong>Tìm kiếm:</strong> Gõ tên hoặc mã hàng.</li>
+            <li><strong>Từ Ngày / Đến Ngày:</strong> Lọc theo khoảng thời gian.</li>
+            <li><strong>Xuất Excel:</strong> Tải xuống lịch sử dạng file Excel.</li>
+        </ul>
+
+        <h3>5.3. Bảng lịch sử</h3>
+        <table>
+            <thead><tr><th>Cột</th><th>Mô tả</th></tr></thead>
+            <tbody>
+                <tr><td>Loại</td><td><span class="badge badge-green">NHẬP</span> hoặc <span class="badge badge-orange">XUẤT</span></td></tr>
+                <tr><td>Ngày</td><td>Ngày thực hiện giao dịch</td></tr>
+                <tr><td>Tên hàng / Mã số</td><td>Thông tin vật tư</td></tr>
+                <tr><td>Số lượng</td><td><span style="color:#34d399;">+N</span> (nhập) hoặc <span style="color:#fbbf24;">-N</span> (xuất)</td></tr>
+                <tr><td>Người thực hiện</td><td>Người nhập/xuất kho</td></tr>
+                <tr><td>Người yêu cầu/nhận</td><td>Dùng cho phiếu xuất</td></tr>
+                <tr><td>Ghi chú</td><td>Ghi chú bổ sung</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- SECTION 6 -->
+    <div class="section" id="sec6">
+        <h2><span class="num">6</span> PHIẾU NHẬP KHO</h2>
+
+        <h3>6.1. Mở form tạo phiếu</h3>
+        <p>Nhấn nút <strong>"+ Tạo phiếu nhập"</strong> (góc trên bên phải). Form sẽ hiện ra phía trên danh sách phiếu.</p>
+
+        <h3>6.2. Điền thông tin phiếu</h3>
+
+        <h4>Bước 1: Thông tin chung</h4>
+        <ul>
+            <li><strong>Ngày nhập:</strong> Mặc định hôm nay, có thể thay đổi.</li>
+            <li><strong>Người nhập:</strong> Tự động lấy tên người đăng nhập (không chỉnh sửa được).</li>
+            <li><strong>Ghi chú chung:</strong> Nội dung, lý do nhập kho (tùy chọn).</li>
+        </ul>
+
+        <h4>Bước 2: Thêm mặt hàng vào phiếu</h4>
+        <ol class="steps">
+            <li>Gõ tên hoặc mã vật tư vào ô <strong>"Tên hàng hóa"</strong>.</li>
+            <li>Danh sách gợi ý hiện ra → Nhấn chọn mặt hàng phù hợp.</li>
+            <li>Hệ thống tự động điền: Mã số, Tồn hiện tại, Đơn vị tính.</li>
+            <li>Nhập <strong>Số lượng nhập</strong> vào ô tương ứng.</li>
+            <li>Nhập <strong>Ghi chú</strong> mặt hàng (nếu có).</li>
+            <li>Nhấn nút <strong>"+ Thêm vào phiếu"</strong>.</li>
+            <li>Lặp lại để thêm nhiều mặt hàng vào cùng 1 phiếu.</li>
+        </ol>
+
+        <div class="note">
+            <strong>💡 Mẹo:</strong> Nếu vật tư chưa có trong hệ thống, nhấn nút <strong>"Tạo mới vật tư"</strong> để thêm vật tư mới.
+        </div>
+
+        <h4>Bước 3: Xác nhận phiếu nhập</h4>
+        <ol class="steps">
+            <li>Kiểm tra lại danh sách mặt hàng trong bảng tạm.</li>
+            <li>Nếu cần xóa, nhấn nút <i class="fas fa-trash" style="color:#ef4444;"></i> trên dòng đó.</li>
+            <li>Nhấn <strong>"Xác nhận nhập kho"</strong> → Hệ thống tự động cập nhật tồn kho.</li>
+        </ol>
+    </div>
+
+    <!-- SECTION 7 -->
+    <div class="section" id="sec7">
+        <h2><span class="num">7</span> PHIẾU XUẤT KHO</h2>
+
+        <h3>7.1. Mở form tạo phiếu</h3>
+        <p>Nhấn nút <strong>"+ Tạo phiếu xuất"</strong> (góc trên bên phải).</p>
+
+        <h3>7.2. Điền thông tin phiếu</h3>
+
+        <h4>Bước 1: Thông tin chung</h4>
+        <ul>
+            <li><strong>Ngày xuất:</strong> Mặc định hôm nay.</li>
+            <li><strong>Người yêu cầu:</strong> Nhập tên bộ phận hoặc người yêu cầu (có gợi ý).</li>
+            <li><strong>Người xuất:</strong> Tự động lấy tên người đăng nhập.</li>
+            <li><strong>Người nhận:</strong> Nhập tên người nhận hàng.</li>
+            <li><strong>Ghi chú chung:</strong> Lý do xuất kho (tùy chọn).</li>
+        </ul>
+
+        <h4>Bước 2: Thêm mặt hàng</h4>
+        <ol class="steps">
+            <li>Gõ tên/mã vật tư → Chọn từ danh sách gợi ý.</li>
+            <li>Nhập <strong>Số lượng xuất</strong> (không vượt quá tồn kho).</li>
+            <li>Chọn <strong>Công đoạn</strong>, <strong>Loại xuất</strong> (nếu có).</li>
+            <li>Nhấn <strong>"+ Thêm vào phiếu"</strong>.</li>
+            <li>Lặp lại để thêm nhiều mặt hàng.</li>
+        </ol>
+
+        <div class="note warning">
+            <strong>⚠️ Quan trọng:</strong> Số lượng xuất <strong>không được lớn hơn</strong> tồn kho hiện tại. Hệ thống sẽ từ chối nếu vượt quá.
+        </div>
+
+        <h4>Bước 3: Xác nhận</h4>
+        <p>Kiểm tra danh sách → Nhấn <strong>"Xác nhận xuất kho"</strong>. Tồn kho sẽ được trừ tự động.</p>
+    </div>
+
+    <!-- SECTION 8 -->
+    <div class="section" id="sec8">
+        <h2><span class="num">8</span> DANH MỤC</h2>
+        <p>Quản lý các danh mục dùng chung, chia thành 5 cột:</p>
+        <table>
+            <thead><tr><th>Cột</th><th>Mô tả</th><th>Ví dụ</th></tr></thead>
+            <tbody>
+                <tr><td><strong>Công đoạn</strong></td><td>Các công đoạn sản xuất</td><td>Kensa, E/D CHECK, CELL</td></tr>
+                <tr><td><strong>Nhân viên</strong></td><td>Danh sách nhân viên</td><td>Phấn 2307, Sự 1402</td></tr>
+                <tr><td><strong>Đơn vị tính</strong></td><td>Loại đơn vị</td><td>Pcs, Roll, Set, Kg</td></tr>
+                <tr><td><strong>Vị trí</strong></td><td>Vị trí lưu trữ</td><td>Kệ A1, Kệ B2</td></tr>
+                <tr><td><strong>Mã quản lý</strong></td><td>Mã nội bộ</td><td>MQL001, MQL002</td></tr>
+            </tbody>
+        </table>
+        <ul>
+            <li><strong>Thêm mới:</strong> Nhấn nút <strong>"+"</strong> ở góc trên mỗi cột.</li>
+            <li><strong>Tìm kiếm:</strong> Mỗi cột có ô tìm kiếm riêng.</li>
+            <li><strong>Sửa / Xóa:</strong> Di chuột vào mục → hiện nút ✏️ và 🗑️.</li>
+        </ul>
+
+        <div class="note success">
+            <strong>💡 Mẹo:</strong> Các danh mục này tự động xuất hiện dưới dạng gợi ý (autocomplete) khi tạo phiếu nhập/xuất.
+        </div>
+    </div>
+
+    <!-- SECTION 9 -->
+    <div class="section" id="sec9">
+        <h2><span class="num">9</span> CHUYỂN KHO</h2>
+
+        <h3>9.1. Tạo phiếu chuyển kho</h3>
+        <ol class="steps">
+            <li>Nhấn nút <strong>"+ Tạo phiếu chuyển"</strong>.</li>
+            <li>Chọn <strong>Kho nguồn</strong> (kho xuất đi) và <strong>Kho đích</strong> (kho nhận vào).</li>
+            <li>Nhập <strong>Ngày chuyển</strong>, <strong>Người chuyển</strong>, <strong>Ghi chú</strong>.</li>
+            <li>Thêm các mặt hàng cần chuyển (tương tự phiếu xuất).</li>
+            <li>Nhấn <strong>Xác nhận</strong> để hoàn tất.</li>
+        </ol>
+
+        <h3>9.2. Kết quả</h3>
+        <ul>
+            <li>Hệ thống tự động <strong>trừ</strong> tồn kho ở kho nguồn.</li>
+            <li>Hệ thống tự động <strong>cộng</strong> tồn kho ở kho đích.</li>
+            <li>Phiếu chuyển được lưu lại để tra cứu.</li>
+        </ul>
+    </div>
+
+    <!-- SECTION 10 -->
+    <div class="section" id="sec10">
+        <h2><span class="num">10</span> BÁO CÁO</h2>
+        <p>Trang báo cáo cho phép bạn xem và xuất các báo cáo tổng hợp dưới dạng file Excel.</p>
+    </div>
+
+    <!-- SECTION 11 -->
+    <div class="section" id="sec11">
+        <h2><span class="num">11</span> ĐỔI MẬT KHẨU & ĐĂNG XUẤT</h2>
+
+        <h3>11.1. Đổi mật khẩu</h3>
+        <ol class="steps">
+            <li>Nhấn biểu tượng <strong>"⋯"</strong> (3 chấm) ở góc dưới cùng bên trái.</li>
+            <li>Chọn <strong>"Đổi mật khẩu"</strong>.</li>
+            <li>Nhập <strong>Mật khẩu cũ</strong>, <strong>Mật khẩu mới</strong>, <strong>Xác nhận mật khẩu mới</strong>.</li>
+            <li>Nhấn <strong>Lưu</strong> để hoàn tất.</li>
+        </ol>
+
+        <h3>11.2. Đăng xuất</h3>
+        <ol class="steps">
+            <li>Nhấn biểu tượng <strong>"⋯"</strong> → Chọn <strong>"Đăng xuất"</strong> (chữ đỏ).</li>
+            <li>Hệ thống quay về màn hình đăng nhập.</li>
+        </ol>
+    </div>
+
+    <!-- SECTION 12 -->
+    <div class="section" id="sec12">
+        <h2><span class="num">12</span> MẸO SỬ DỤNG NHANH</h2>
+
+        <h3>⌨️ Phím tắt hữu ích</h3>
+        <table>
+            <thead><tr><th>Phím</th><th>Chức năng</th></tr></thead>
+            <tbody>
+                <tr><td><kbd>F5</kbd></td><td>Tải lại trang, cập nhật dữ liệu mới nhất</td></tr>
+                <tr><td><kbd>Ctrl</kbd> + <kbd>F</kbd></td><td>Tìm kiếm nhanh trên trang (chức năng trình duyệt)</td></tr>
+                <tr><td><kbd>Enter</kbd></td><td>Xác nhận form sau khi điền đầy đủ thông tin</td></tr>
+            </tbody>
+        </table>
+
+        <h3>🔍 Tìm kiếm thông minh</h3>
+        <ul>
+            <li>Gõ <strong>2 ký tự trở lên</strong> → hệ thống tự động gợi ý mặt hàng.</li>
+            <li>Có thể tìm theo <strong>tên hàng</strong> hoặc <strong>mã số</strong>.</li>
+        </ul>
+
+        <h3>📊 Chuyển kho nhanh</h3>
+        <p>Dùng dropdown <strong>chọn kho</strong> trên thanh trên cùng để xem dữ liệu từng kho riêng biệt mà không cần chuyển trang.</p>
+
+        <h3>🌙 Chế độ tối</h3>
+        <p>Nhấn <i class="fas fa-sun"></i>/<i class="fas fa-moon"></i> trên thanh trên cùng. Chế độ tối giúp giảm mỏi mắt khi làm việc lâu.</p>
+
+        <div class="note danger">
+            <strong>⚠️ Những điều cần lưu ý:</strong>
+            <ol style="margin-top: 8px;">
+                <li><strong>Không tự ý xóa</strong> vật tư hoặc giao dịch nếu không được phép.</li>
+                <li><strong>Luôn kiểm tra kỹ</strong> số lượng trước khi xác nhận phiếu.</li>
+                <li>Nếu nhập/xuất sai → <strong>liên hệ quản trị viên</strong> để hoàn tác.</li>
+                <li>Thường xuyên kiểm tra <strong>Cảnh báo tồn kho</strong> trên Dashboard.</li>
+            </ol>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p><strong>Liên hệ hỗ trợ kỹ thuật:</strong> Phạm Duy Trung — <a href="mailto:trung.phamduy@vn.sharp-world.com">trung.phamduy@vn.sharp-world.com</a></p>
+        <p style="margin-top: 8px;">© 2026 SMV System — Hệ thống Quản lý Kho Thông Minh</p>
+    </div>
+
+</div>
+
+<!-- Scroll to top button -->
+<button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+    <i class="fas fa-arrow-up"></i>
+</button>
+
+<script>
+    // Scroll to top visibility
+    window.addEventListener('scroll', () => {
+        document.getElementById('scrollTop').classList.toggle('show', window.scrollY > 300);
+    });
+
+    // Active TOC item on scroll
+    const sections = document.querySelectorAll('.section');
+    const tocLinks = document.querySelectorAll('.toc a');
+
+    window.addEventListener('scroll', () => {
+        let current = '';
+        sections.forEach(section => {
+            const top = section.offsetTop - 60;
+            if (window.scrollY >= top) current = section.id;
+        });
+        tocLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === '#' + current) link.classList.add('active');
+        });
+    });
+
+    // Close mobile sidebar on link click
+    tocLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            document.querySelector('.sidebar').classList.remove('open');
+        });
+    });
+</script>
+
+</body>
+</html>

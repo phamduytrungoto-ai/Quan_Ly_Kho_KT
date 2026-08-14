@@ -107,3 +107,11 @@ def serve_frontend():
     if os.path.exists(index_path):
         return FileResponse(index_path)
     return {"message": "Frontend not found. Place index.html in /frontend/"}
+
+# Serve user guide
+@app.get("/guide")
+def serve_guide():
+    guide_path = os.path.join(FRONTEND_DIR, "..", "HUONG_DAN_SU_DUNG.html")
+    if os.path.exists(guide_path):
+        return FileResponse(guide_path)
+    return {"message": "Guide not found."}
