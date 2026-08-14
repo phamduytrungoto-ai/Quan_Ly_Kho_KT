@@ -54,6 +54,23 @@ def _github_headers():
         headers['Authorization'] = f'token {token}'
     return headers, bool(token)
 
+def fetch_url(req, timeout=15):
+    """Gửi request có hỗ trợ fallback proxy mạng công ty Sharp."""
+    import urllib.request
+    
+    # 1. Thử kết nối trực tiếp (dành cho mạng ở nhà/4G)
+    try:
+        opener_no_proxy = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+        return opener_no_proxy.open(req, timeout=timeout)
+    except Exception as e1:
+        # 2. Thử kết nối qua Proxy (dành cho mạng công ty)
+        try:
+            proxy_url = "http://proxy-asia.global.sharp:3080"
+            opener_proxy = urllib.request.build_opener(urllib.request.ProxyHandler({'http': proxy_url, 'https': proxy_url}))
+            return opener_proxy.open(req, timeout=timeout)
+        except Exception as e2:
+            raise Exception(f"Direct: {str(e1) or type(e1).__name__} | Proxy: {str(e2) or type(e2).__name__}")
+
 def find_git_executable():
     """Tìm git.exe trên máy, kể cả khi không nằm trong PATH."""
     try:
@@ -103,7 +120,7 @@ def get_releases(_ = Depends(require_admin)):
         # Lấy danh sách Releases
         api_url = f"https://api.github.com/repos/{GITHUB_REPO}/releases?per_page=20"
         req = urllib.request.Request(api_url, headers=headers)
-        with urllib.request.urlopen(req, timeout=15) as response:
+        with fetch_url(req, timeout=15) as response:
             releases = json.loads(response.read().decode())
             for r in releases:
                 versions.append({
@@ -121,7 +138,7 @@ def get_releases(_ = Depends(require_admin)):
         try:
             api_url = f"https://api.github.com/repos/{GITHUB_REPO}/tags?per_page=20"
             req = urllib.request.Request(api_url, headers=headers)
-            with urllib.request.urlopen(req, timeout=15) as response:
+            with fetch_url(req, timeout=15) as response:
                 tags = json.loads(response.read().decode())
                 for t in tags:
                     versions.append({
@@ -178,7 +195,7 @@ def update_system(version: str = "main", _ = Depends(require_admin)):
                     api_url = f"https://github.com/{GITHUB_REPO}/archive/refs/heads/{ref}.zip" if ref in ["main", "master"] else f"https://github.com/{GITHUB_REPO}/archive/refs/tags/{ref}.zip"
                 
                 req = urllib.request.Request(api_url, headers=headers)
-                with urllib.request.urlopen(req, timeout=120) as response:
+                with fetch_url(req, timeout=120) as response:
                     zip_content = response.read()
                     output += f"Đã tải thành công phiên bản '{ref}' ({len(zip_content) // 1024} KB).\n"
                     break
