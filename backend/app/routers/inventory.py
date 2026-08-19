@@ -151,10 +151,15 @@ def list_items(
 @router.get("/all")
 def list_all_items(
     search: Optional[str] = None,
+    kho_id: Optional[int] = None,
     db: Session = Depends(get_db),
+    current_user = Depends(require_permission("perm_view"))
 ):
-    """Láº¥y táº¥t cáº£ items (cho autocomplete). Tráº£ vá»  id, ten_hang, ma_so, don_vi_tinh, ton_cuoi."""
+    """Lấy tất cả items (cho autocomplete). Trả về id, ten_hang, ma_so, don_vi_tinh, ton_cuoi."""
     query = db.query(Item.id, Item.ten_hang, Item.ma_so, Item.don_vi_tinh, Item.ton_cuoi, Item.ma_quan_ly)
+    
+    query = apply_warehouse_filter(query, Item, current_user, kho_id)
+    
     if search:
         search_lower = search.lower()
         query = query.filter(
@@ -163,7 +168,7 @@ def list_all_items(
                 func.lower(Item.ma_so).contains(search_lower),
             )
         )
-    items = query.order_by(Item.ten_hang).limit(50).all()
+    items = query.order_by(Item.ten_hang).all()
     return [
         {
             "id": i.id,

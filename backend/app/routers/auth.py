@@ -37,7 +37,7 @@ from ..mail_utils import send_otp_email
 @router.post("/forgot-password")
 def forgot_password(request: schemas.ForgotPasswordRequest, db: Session = Depends(database.get_db)):
     user = db.query(models.User).filter(
-        (models.User.username == request.username) | (models.User.email == request.username)
+        (func.lower(models.User.username) == request.username.lower()) | (func.lower(models.User.email) == request.username.lower())
     ).first()
     
     if not user:
@@ -61,7 +61,7 @@ def forgot_password(request: schemas.ForgotPasswordRequest, db: Session = Depend
         user.reset_otp = None
         user.reset_otp_expire = None
         db.commit()
-        raise HTTPException(status_code=500, detail=f"Không thể gửi email: {str(e)}")
+        raise HTTPException(status_code=500, detail="Không thể gửi email OTP. Vui lòng liên hệ Admin để kiểm tra lại cấu hình Email (SMTP) trong phần Cài đặt hệ thống.")
         
     # partially hide email for security
     hidden_email = user.email[:2] + "***" + user.email[user.email.find("@"):]
@@ -70,7 +70,7 @@ def forgot_password(request: schemas.ForgotPasswordRequest, db: Session = Depend
 @router.post("/reset-password")
 def reset_password(request: schemas.ResetPasswordRequest, db: Session = Depends(database.get_db)):
     user = db.query(models.User).filter(
-        (models.User.username == request.username) | (models.User.email == request.username)
+        (func.lower(models.User.username) == request.username.lower()) | (func.lower(models.User.email) == request.username.lower())
     ).first()
     
     if not user:

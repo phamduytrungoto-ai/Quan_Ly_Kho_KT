@@ -523,12 +523,27 @@ const App = {
             }
         });
 
+        const btnUserGuide = document.getElementById('btnUserGuide');
+        if (btnUserGuide) {
+            btnUserGuide.href = API_BASE_URL.replace('/api', '/guide');
+            btnUserGuide.target = '_blank';
+            btnUserGuide.addEventListener('click', () => {
+                if (window.innerWidth <= 1024) {
+                    document.getElementById('sidebar').classList.remove('mobile-open');
+                }
+            });
+        }
+
         // Click menu item
         navItems.forEach(item => {
+            if (item.id === 'btnUserGuide') return; // let browser handle it natively
+
             item.addEventListener('click', (e) => {
                 e.preventDefault();
                 const page = item.dataset.page;
-                window.location.hash = page;
+                if (page) {
+                    window.location.hash = page;
+                }
                 
                 if (window.innerWidth <= 1024) {
                     sidebar.classList.remove('mobile-open');
