@@ -1,4 +1,27 @@
-INFO:     Started server process [40432]
+INFO:     Started server process [41884]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
 INFO:     Uvicorn running on http://0.0.0.0:8888 (Press CTRL+C to quit)
+Database initialized
+Email scheduler started
+WMS Server is running!
+INFO:     127.0.0.1:51969 - "GET /js/components/charts.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:61811 - "GET /js/app.js?v=2 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:62466 - "GET /js/pages/settings.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:59509 - "POST /api/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59509 - "GET /api/auth/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59509 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59509 - "GET /js/components/charts.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:59509 - "GET /js/pages/settings.js?v=2 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:56509 - "OPTIONS /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53398 - "OPTIONS /api/reports/dashboard?kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56509 - "GET /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53398 - "GET /api/reports/dashboard?kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53398 - "OPTIONS /api/items?page=1&page_size=50&search=&sort_by=id&sort_dir=asc&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53398 - "GET /api/items?page=1&page_size=50&search=&sort_by=id&sort_dir=asc&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53398 - "OPTIONS /api/transactions?page=1&page_size=50&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53398 - "GET /api/transactions?page=1&page_size=50&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53398 - "OPTIONS /api/receipts?page=1&page_size=50&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53398 - "GET /api/receipts?page=1&page_size=50&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53398 - "OPTIONS /api/items/all?search=&kho_id=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53398 - "GET /api/items/all?search=&kho_id=1 HTTP/1.1" 200 OK
