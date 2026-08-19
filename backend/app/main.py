@@ -110,6 +110,7 @@ def serve_frontend():
 
 # Serve user guide
 @app.get("/guide")
+@app.get("/api/guide")
 def serve_guide():
     guide_path = os.path.join(FRONTEND_DIR, "..", "HUONG_DAN_SU_DUNG.html")
     if os.path.exists(guide_path):
