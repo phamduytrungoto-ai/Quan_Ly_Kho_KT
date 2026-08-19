@@ -69,7 +69,7 @@ def fetch_url(req, timeout=15):
             opener_proxy = urllib.request.build_opener(urllib.request.ProxyHandler({'http': proxy_url, 'https': proxy_url}))
             return opener_proxy.open(req, timeout=timeout)
         except Exception as e2:
-            raise Exception(f"Direct: {str(e1) or type(e1).__name__} | Proxy: {str(e2) or type(e2).__name__}")
+            raise Exception(f"Direct: {repr(e1)} | Proxy: {repr(e2)}")
 
 def find_git_executable():
     """Tìm git.exe trên máy, kể cả khi không nằm trong PATH."""

@@ -276,11 +276,11 @@ const App = {
                                     
                                     try {
                                         const res = await api.fetchJSON(`/settings/update_system?version=${encodeURIComponent(selectedVersion)}`, { method: 'POST' });
-                                        resultDiv.innerHTML = res.message + '\n\nOutput:\n' + (res.output || '');
+                                        resultDiv.textContent = res.message + '\n\nOutput:\n' + (res.output || '');
                                         resultDiv.style.color = '#10b981';
                                         if (window.toast) window.toast.success('Cập nhật thành công! Hãy khởi động lại server.');
                                     } catch (err) {
-                                        resultDiv.innerHTML = 'Lỗi cập nhật:\n' + err.message;
+                                        resultDiv.textContent = 'Lỗi cập nhật:\n' + err.message;
                                         resultDiv.style.color = '#ef4444';
                                         if (window.toast) window.toast.error('Cập nhật thất bại: ' + err.message);
                                     } finally {
