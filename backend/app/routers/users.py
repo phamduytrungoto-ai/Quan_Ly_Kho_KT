@@ -2,6 +2,7 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from .. import models, schemas, auth_utils, database, deps
+from ..logger import log_action
 
 router = APIRouter(prefix="/api/users", tags=["users"])
 
@@ -32,6 +33,7 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(database.get_db)
         db.commit()
         db.refresh(db_user)
         
+    log_action(db, None, current_admin, "Tạo người dùng", f"Tài khoản: {db_user.username}, Tên: {db_user.full_name}")
     return db_user
 
 @router.put("/{user_id}", response_model=schemas.UserResponse)
@@ -59,6 +61,7 @@ def update_user(user_id: int, user: schemas.UserUpdate, db: Session = Depends(da
             
     db.commit()
     db.refresh(db_user)
+    log_action(db, None, current_admin, "Cập nhật người dùng", f"Tài khoản: {db_user.username}, Tên: {db_user.full_name}")
     return db_user
 
 @router.delete("/{user_id}")
@@ -71,4 +74,5 @@ def delete_user(user_id: int, db: Session = Depends(database.get_db), current_ad
         
     db.delete(db_user)
     db.commit()
-    return {"ok": True}
+    log_action(db, None, current_admin, "Xóa người dùng", f"Tài khoản: {db_user.username}")
+    return {"message": "User deleted successfully"}

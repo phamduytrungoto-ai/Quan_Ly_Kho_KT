@@ -119,7 +119,29 @@ const api = {
             }
 
             return await response.json();
-        }
+        },
+        importExcel: async (file, updateExisting = false) => {
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            const token = sessionStorage.getItem('wms_token');
+            const khoId = api.getKhoId();
+            const response = await fetch(`${API_BASE_URL}/items/import?kho_id=${khoId}&update_existing=${updateExisting}`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: formData
+            });
+
+            if (!response.ok) {
+                const error = await response.json().catch(() => ({}));
+                throw new Error(error.detail || 'Lỗi khi nhập file Excel');
+            }
+
+            return await response.json();
+        },
+        getImportTemplateUrl: () => `${API_BASE_URL}/items/import/template`
     },
 
     // Authentication

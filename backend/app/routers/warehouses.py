@@ -25,7 +25,7 @@ def create_warehouse(warehouse: WarehouseCreate, db: Session = Depends(get_db), 
     db.add(db_wh)
     db.commit()
     db.refresh(db_wh)
-    log_action(db, None, current_user, "Thêm kho mới", f"Mã kho: {db_wh.ma_kho}")
+    log_action(db, None, current_user, "Thêm kho mới", f"Mã kho: {db_wh.ma_kho}, Tên: {db_wh.ten_kho}")
     return db_wh
 
 @router.put("/{id}", response_model=WarehouseResponse)
@@ -50,7 +50,7 @@ def update_warehouse(id: int, warehouse: WarehouseUpdate, db: Session = Depends(
     
     db.commit()
     db.refresh(db_wh)
-    log_action(db, None, current_user, "Cập nhật thông tin kho", f"Mã kho: {db_wh.ma_kho}")
+    log_action(db, None, current_user, "Cập nhật thông tin kho", f"Mã kho: {db_wh.ma_kho}, Tên: {db_wh.ten_kho}")
     return db_wh
 
 @router.delete("/{id}")
@@ -68,5 +68,5 @@ def delete_warehouse(id: int, db: Session = Depends(get_db), current_user = Depe
         
     db.delete(db_wh)
     db.commit()
-    log_action(db, None, current_user, "Xoá kho", f"Mã kho: {db_wh.ma_kho}")
+    log_action(db, None, current_user, "Xoá kho", f"Mã kho: {db_wh.ma_kho}, Tên: {db_wh.ten_kho}")
     return {"detail": "Đã xóa kho thành công"}

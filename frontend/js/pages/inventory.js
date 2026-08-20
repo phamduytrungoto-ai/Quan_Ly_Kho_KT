@@ -16,7 +16,8 @@ const InventoryPage = {
             <div class="card">
                 <div class="card-header">
                     <h3 class="card-title">Danh sách Tồn Kho</h3>
-                    <div class="action-btns">
+                    <div class="action-btns" style="gap: 8px; display: flex;">
+                        <button class="btn btn-success" id="btnImportExcel" style="display: none;"><i class="fas fa-file-upload"></i> Nhập từ Excel</button>
                         <button class="btn btn-primary" id="btnExportExcel"><i class="fas fa-file-excel"></i> Xuất Excel</button>
                     </div>
                 </div>
@@ -288,6 +289,194 @@ const InventoryPage = {
             } finally {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
+            }
+        });
+
+        // Import Excel - show button if has permission
+        const btnImport = document.getElementById('btnImportExcel');
+        if (btnImport && window.Auth.hasPermission('perm_add')) {
+            btnImport.style.display = '';
+        }
+        
+        if (btnImport) {
+            btnImport.addEventListener('click', () => {
+                if (!window.Auth.hasPermission('perm_add')) {
+                    window.toast.error('Bạn không có quyền nhập dữ liệu.');
+                    return;
+                }
+                this.showImportExcelModal();
+            });
+        }
+    },
+
+    showImportExcelModal() {
+        const modalHtml = `
+            <div style="padding: 20px; max-width: 550px;">
+                <h3 style="margin-bottom: 15px; font-size: 1.3rem; color: var(--text-heading);">
+                    <i class="fas fa-file-upload" style="color: var(--color-success);"></i> Nhập sản phẩm từ Excel
+                </h3>
+                
+                <div style="background: var(--bg-hover); border-radius: 8px; padding: 15px; margin-bottom: 15px;">
+                    <p style="margin: 0 0 8px; font-size: 0.9em; color: var(--text-muted);">
+                        <i class="fas fa-info-circle"></i> 
+                        Upload file Excel (.xlsx) theo đúng mẫu. Cột <b>Mã số</b> là bắt buộc.
+                    </p>
+                    <a href="#" id="btnDownloadTemplate" style="color: var(--color-primary); font-size: 0.9em; text-decoration: underline;">
+                        <i class="fas fa-download"></i> Tải file Excel mẫu
+                    </a>
+                </div>
+
+                <div style="border: 2px dashed var(--border-color); border-radius: 10px; padding: 30px; text-align: center; margin-bottom: 15px; cursor: pointer; transition: all 0.2s;" id="importDropZone">
+                    <i class="fas fa-cloud-upload-alt" style="font-size: 2.5rem; color: var(--text-muted); margin-bottom: 10px; display: block;"></i>
+                    <p style="margin: 0; color: var(--text-muted);">Kéo thả file Excel vào đây</p>
+                    <p style="margin: 5px 0; font-size: 0.85em; color: var(--text-muted);">hoặc</p>
+                    <button class="btn btn-outline-primary btn-sm" id="btnChooseFile" type="button">
+                        <i class="fas fa-folder-open"></i> Chọn file từ máy tính
+                    </button>
+                    <input type="file" id="importFileInput" accept=".xlsx,.xls" style="display: none;">
+                    <div id="selectedFileInfo" style="display: none; margin-top: 12px; padding: 10px; background: var(--bg-card); border-radius: 6px; text-align: left;">
+                        <i class="fas fa-file-excel" style="color: #4CAF50;"></i>
+                        <span id="selectedFileName" style="font-weight: 500; margin-left: 5px;"></span>
+                        <button type="button" id="btnRemoveFile" style="float: right; border: none; background: none; cursor: pointer; color: var(--text-danger);">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.95em;">
+                        <input type="checkbox" id="chkUpdateExisting" style="width: 18px; height: 18px;">
+                        <span>Cập nhật sản phẩm đã tồn tại (nếu trùng Mã số)</span>
+                    </label>
+                    <p style="font-size: 0.8em; color: var(--text-muted); margin: 4px 0 0 26px;">
+                        Nếu bỏ trống, hệ thống sẽ bỏ qua các mã số đã có trong kho.
+                    </p>
+                </div>
+
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button class="btn btn-ghost" id="btnCancelImport">Hủy</button>
+                    <button class="btn btn-success" id="btnConfirmImport" disabled>
+                        <i class="fas fa-upload"></i> Nhập dữ liệu
+                    </button>
+                </div>
+            </div>
+        `;
+
+        const overlay = document.createElement('div');
+        overlay.id = 'importExcelOverlay';
+        overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(3px);';
+        
+        const modal = document.createElement('div');
+        modal.style.cssText = 'background: var(--bg-card); border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto; animation: fadeInUp 0.3s ease;';
+        modal.innerHTML = modalHtml;
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+
+        // State
+        let selectedFile = null;
+
+        // Template download
+        document.getElementById('btnDownloadTemplate').addEventListener('click', async (e) => {
+            e.preventDefault();
+            try {
+                const response = await fetch(api.inventory.getImportTemplateUrl(), {
+                    headers: { 'Authorization': 'Bearer ' + window.Auth.token }
+                });
+                if (!response.ok) throw new Error('Lỗi tải file mẫu');
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'Mau_Nhap_Ton_Kho.xlsx';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+            } catch (err) {
+                window.toast.error(err.message);
+            }
+        });
+
+        // File input
+        const fileInput = document.getElementById('importFileInput');
+        const dropZone = document.getElementById('importDropZone');
+        const confirmBtn = document.getElementById('btnConfirmImport');
+
+        const setFile = (file) => {
+            if (!file) return;
+            if (!file.name.match(/\.(xlsx|xls)$/i)) {
+                window.toast.error('Chỉ hỗ trợ file Excel (.xlsx, .xls)');
+                return;
+            }
+            selectedFile = file;
+            document.getElementById('selectedFileName').textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+            document.getElementById('selectedFileInfo').style.display = 'block';
+            confirmBtn.disabled = false;
+            dropZone.style.borderColor = 'var(--color-success)';
+        };
+
+        document.getElementById('btnChooseFile').addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', (e) => { if (e.target.files[0]) setFile(e.target.files[0]); });
+
+        // Drag & Drop
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.style.borderColor = 'var(--color-primary)'; dropZone.style.background = 'var(--bg-hover)'; });
+        dropZone.addEventListener('dragleave', () => { dropZone.style.borderColor = 'var(--border-color)'; dropZone.style.background = ''; });
+        dropZone.addEventListener('drop', (e) => { e.preventDefault(); dropZone.style.background = ''; if (e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]); });
+
+        // Remove file
+        document.getElementById('btnRemoveFile').addEventListener('click', () => {
+            selectedFile = null;
+            fileInput.value = '';
+            document.getElementById('selectedFileInfo').style.display = 'none';
+            confirmBtn.disabled = true;
+            dropZone.style.borderColor = 'var(--border-color)';
+        });
+
+        // Cancel
+        const closeModal = () => overlay.remove();
+        document.getElementById('btnCancelImport').addEventListener('click', closeModal);
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+
+        // Confirm Import
+        confirmBtn.addEventListener('click', async () => {
+            if (!selectedFile) return;
+
+            const updateExisting = document.getElementById('chkUpdateExisting').checked;
+            const originalText = confirmBtn.innerHTML;
+            confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+            confirmBtn.disabled = true;
+
+            try {
+                const result = await api.inventory.importExcel(selectedFile, updateExisting);
+                
+                closeModal();
+                
+                // Show detailed result
+                let resultHtml = `<div style="text-align: center; padding: 10px;">`;
+                resultHtml += `<i class="fas fa-check-circle" style="font-size: 3rem; color: var(--color-success); margin-bottom: 10px; display: block;"></i>`;
+                resultHtml += `<h3 style="margin-bottom: 15px;">Nhập Excel thành công!</h3>`;
+                resultHtml += `<div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">`;
+                if (result.success_count > 0) {
+                    resultHtml += `<div style="padding: 10px 20px; background: rgba(76,175,80,0.1); border-radius: 8px; border: 1px solid rgba(76,175,80,0.3);"><div style="font-size: 1.5rem; font-weight: bold; color: #4CAF50;">${result.success_count}</div><div style="font-size: 0.85em; color: var(--text-muted);">Thêm mới</div></div>`;
+                }
+                if (result.update_count > 0) {
+                    resultHtml += `<div style="padding: 10px 20px; background: rgba(33,150,243,0.1); border-radius: 8px; border: 1px solid rgba(33,150,243,0.3);"><div style="font-size: 1.5rem; font-weight: bold; color: #2196F3;">${result.update_count}</div><div style="font-size: 0.85em; color: var(--text-muted);">Cập nhật</div></div>`;
+                }
+                if (result.skip_count > 0) {
+                    resultHtml += `<div style="padding: 10px 20px; background: rgba(255,152,0,0.1); border-radius: 8px; border: 1px solid rgba(255,152,0,0.3);"><div style="font-size: 1.5rem; font-weight: bold; color: #FF9800;">${result.skip_count}</div><div style="font-size: 0.85em; color: var(--text-muted);">Bỏ qua</div></div>`;
+                }
+                resultHtml += `</div></div>`;
+
+                window.modal.show({
+                    title: 'Kết quả nhập Excel',
+                    content: resultHtml,
+                    buttons: [{ text: 'Đóng', class: 'btn-primary', onClick: (m) => m.hide() }]
+                });
+                this.loadData(); // Refresh table
+            } catch (error) {
+                window.toast.error(error.message || 'Lỗi khi nhập file Excel');
+                confirmBtn.innerHTML = originalText;
+                confirmBtn.disabled = false;
             }
         });
     },

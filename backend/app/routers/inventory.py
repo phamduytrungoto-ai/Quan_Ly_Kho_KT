@@ -212,7 +212,7 @@ def create_item(data: ItemCreate, db: Session = Depends(get_db), current_user = 
     db.add(new_item)
     db.commit()
     db.refresh(new_item)
-    log_action(db, None, current_user, "Thêm hàng hóa", f"Mã quản lý: {new_item.ma_quan_ly}, Mã số: {new_item.ma_so}")
+    log_action(db, None, current_user, "Thêm hàng hóa", f"Mã quản lý: {new_item.ma_quan_ly}, Mã số: {new_item.ma_so}, Tên: {new_item.ten_hang}")
     return new_item
 
 
@@ -241,7 +241,7 @@ def update_item(item_id: int, data: ItemUpdate, db: Session = Depends(get_db), c
 
     db.commit()
     db.refresh(item)
-    log_action(db, None, current_user, "Cập nhật hàng hóa", f"ID: {item.id}, Mã: {item.ma_so}")
+    log_action(db, None, current_user, "Cập nhật hàng hóa", f"Mã số: {item.ma_so}, Tên: {item.ten_hang}")
     return item
 
 
@@ -263,7 +263,7 @@ def delete_item(
 
     db.delete(item)
     db.commit()
-    log_action(db, None, current_user, "Xóa hàng hóa", f"Mã: {item.ma_so}")
+    log_action(db, None, current_user, "Xóa hàng hóa", f"Mã số: {item.ma_so}, Tên: {item.ten_hang}")
     return {"message": "Deleted successfully"}
 
 @router.post("/{item_id}/image")
@@ -317,10 +317,86 @@ def upload_item_image(
 
     return {"message": "Image uploaded successfully", "url": new_url, "images": images}
 
+@router.get("/import/template")
+def download_import_template(current_user = Depends(deps.get_current_user)):
+    """Tải file Excel mẫu để nhập tồn kho."""
+    import openpyxl
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    from fastapi.responses import StreamingResponse
+    import io
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Nhập tồn kho"
+
+    # Headers
+    headers = [
+        ("Mã quản lý", 15),
+        ("Tên hàng", 40),
+        ("Mã số", 20),
+        ("Nhà cung cấp", 25),
+        ("Đơn giá", 15),
+        ("Vị trí", 15),
+        ("ĐVT", 10),
+        ("Tồn kho", 12),
+        ("Định mức", 12),
+        ("Công đoạn", 20),
+        ("Loại vật tư", 20),
+        ("Thông số kỹ thuật", 30),
+        ("Ghi chú", 25),
+    ]
+
+    header_font = Font(bold=True, color="FFFFFF", size=11)
+    header_fill = PatternFill(start_color="2196F3", end_color="2196F3", fill_type="solid")
+    header_align = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    thin_border = Border(
+        left=Side(style="thin"), right=Side(style="thin"),
+        top=Side(style="thin"), bottom=Side(style="thin")
+    )
+
+    for col_idx, (name, width) in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col_idx, value=name)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = header_align
+        cell.border = thin_border
+        ws.column_dimensions[openpyxl.utils.get_column_letter(col_idx)].width = width
+
+    # Sample row
+    sample = ["BE", "BEARING 6200", "6200-2RS", "NSK", 50000, "Kệ A1", "PCS", 10, 5, "Sản xuất", "Vật tư dự phòng", "20x30x9mm", "Hàng mới"]
+    for col_idx, val in enumerate(sample, 1):
+        cell = ws.cell(row=2, column=col_idx, value=val)
+        cell.border = thin_border
+        cell.alignment = Alignment(vertical="center")
+
+    # Note row
+    note_cell = ws.cell(row=4, column=1, value="Lưu ý: Cột 'Mã số' là bắt buộc. Các cột khác có thể để trống.")
+    note_cell.font = Font(italic=True, color="FF6600")
+    ws.merge_cells(start_row=4, start_column=1, end_row=4, end_column=6)
+
+    note2 = ws.cell(row=5, column=1, value="Loại vật tư: 'Vật tư tiêu hao', 'Vật tư dự phòng', hoặc 'Công cụ dụng cụ'")
+    note2.font = Font(italic=True, color="888888")
+    ws.merge_cells(start_row=5, start_column=1, end_row=5, end_column=6)
+
+    ws.row_dimensions[1].height = 30
+    ws.freeze_panes = "A2"
+
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": "attachment; filename=Mau_Nhap_Ton_Kho.xlsx"}
+    )
+
+
 @router.post("/import")
 async def import_excel(
     file: UploadFile = File(...),
     kho_id: int = Query(1),
+    update_existing: bool = Query(False),
     db: Session = Depends(get_db),
     current_user = Depends(deps.get_current_user)
 ):
@@ -337,30 +413,74 @@ async def import_excel(
         df = pd.read_excel(io.BytesIO(contents))
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Lỗi đọc file Excel: {str(e)}")
-        
+
+    def clean(val, default=""):
+        """Chuyển giá trị từ pandas sang string, xử lý NaN."""
+        s = str(val).strip() if val is not None else ""
+        return default if s == "nan" or s == "" else s
+
+    def clean_int(val, default=0):
+        try:
+            return int(float(val))
+        except:
+            return default
+
+    def clean_float(val, default=0.0):
+        try:
+            return float(val)
+        except:
+            return default
+
     success_count = 0
+    update_count = 0
     skip_count = 0
+    errors = []
     
     for index, row in df.iterrows():
-        ma_so = str(row.get('Mã số', '')).strip()
-        if not ma_so or ma_so == 'nan':
-            ma_so = str(row.get('Part No.', '')).strip()
-        if not ma_so or ma_so == 'nan':
+        row_num = index + 2  # Excel row number (1-indexed header + data)
+        
+        ma_so = clean(row.get('Mã số', ''))
+        if not ma_so:
+            ma_so = clean(row.get('Part No.', ''))
+        if not ma_so:
             continue
             
-        ten_hang = str(row.get('Tên hàng', '')).strip()
-        if ten_hang == 'nan': ten_hang = ''
+        ten_hang = clean(row.get('Tên hàng', ''))
         
         # Check existing
         existing = db.query(Item).filter(Item.ma_so == ma_so, Item.kho_id == kho_id).first()
+        
         if existing:
-            skip_count += 1
+            if update_existing:
+                # Cập nhật thông tin (KHÔNG thay đổi tồn kho)
+                if ten_hang: existing.ten_hang = ten_hang
+                ncc = clean(row.get('Nhà cung cấp', ''))
+                if ncc: existing.nha_cung_cap = ncc
+                don_gia = row.get('Đơn giá', None)
+                if don_gia is not None and clean(don_gia): existing.don_gia = clean_float(don_gia)
+                vi_tri = clean(row.get('Vị trí', ''))
+                if vi_tri: existing.vi_tri = vi_tri
+                dvt = clean(row.get('ĐVT', ''))
+                if dvt: existing.don_vi_tinh = dvt
+                dinh_muc = row.get('Định mức', None)
+                if dinh_muc is not None and clean(dinh_muc): existing.dinh_muc = clean_int(dinh_muc)
+                cong_doan = clean(row.get('Công đoạn', ''))
+                if cong_doan: existing.cong_doan = cong_doan
+                loai_vt = clean(row.get('Loại vật tư', ''))
+                if loai_vt: existing.loai_vat_tu = loai_vt
+                tskt = clean(row.get('Thông số kỹ thuật', ''))
+                if tskt: existing.thong_so_ky_thuat = tskt
+                ghi_chu = clean(row.get('Ghi chú', ''))
+                if ghi_chu: existing.ghi_chu = ghi_chu
+                ma_ql = clean(row.get('Mã quản lý', ''))
+                if ma_ql: existing.ma_quan_ly = ma_ql
+                update_count += 1
+            else:
+                skip_count += 1
             continue
-            
-        try:
-            ton_dau = int(float(row.get('Tồn kho', 0)))
-        except:
-            ton_dau = 0
+        
+        # Tạo mới
+        ton_dau = clean_int(row.get('Tồn kho', 0))
             
         new_item = Item(
             ma_so=ma_so,
@@ -368,15 +488,34 @@ async def import_excel(
             kho_id=kho_id,
             ton_dau=ton_dau,
             ton_cuoi=ton_dau,
-            ma_quan_ly=str(row.get('Mã quản lý', '')).replace('nan', ''),
-            don_vi_tinh=str(row.get('ĐVT', 'PCS')).replace('nan', ''),
-            vi_tri=str(row.get('Vị trí', '')).replace('nan', ''),
-            ghi_chu=str(row.get('Ghi chú', '')).replace('nan', '')
+            ma_quan_ly=clean(row.get('Mã quản lý', '')),
+            don_vi_tinh=clean(row.get('ĐVT', ''), 'PCS'),
+            vi_tri=clean(row.get('Vị trí', '')),
+            ghi_chu=clean(row.get('Ghi chú', '')),
+            nha_cung_cap=clean(row.get('Nhà cung cấp', '')),
+            don_gia=clean_float(row.get('Đơn giá', 0)),
+            dinh_muc=clean_int(row.get('Định mức', 0)),
+            cong_doan=clean(row.get('Công đoạn', '')),
+            loai_vat_tu=clean(row.get('Loại vật tư', ''), 'Vật tư tiêu hao'),
+            thong_so_ky_thuat=clean(row.get('Thông số kỹ thuật', '')),
         )
         db.add(new_item)
         success_count += 1
         
     db.commit()
-    log_action(db, None, current_user, "Nhập tồn kho từ Excel", f"Kho ID: {kho_id}, Thành công: {success_count}, Bỏ qua: {skip_count}")
     
-    return {"message": f"Nhập thành công {success_count} mã hàng, bỏ qua {skip_count} mã hàng"}
+    detail_parts = []
+    if success_count: detail_parts.append(f"Thêm mới: {success_count}")
+    if update_count: detail_parts.append(f"Cập nhật: {update_count}")
+    if skip_count: detail_parts.append(f"Bỏ qua (đã tồn tại): {skip_count}")
+    detail_msg = ", ".join(detail_parts) if detail_parts else "Không có dữ liệu"
+    
+    log_action(db, None, current_user, "Nhập tồn kho từ Excel", f"Kho ID: {kho_id}, {detail_msg}")
+    
+    return {
+        "message": f"Nhập Excel hoàn tất. {detail_msg}",
+        "success_count": success_count,
+        "update_count": update_count,
+        "skip_count": skip_count
+    }
+

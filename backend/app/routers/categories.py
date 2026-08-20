@@ -34,7 +34,7 @@ def create_category(data: CategoryCreate, db: Session = Depends(get_db), current
     db.add(cat)
     db.commit()
     db.refresh(cat)
-    log_action(db, None, current_user, "Thêm danh mục", f"Tên: {cat.gia_tri}")
+    log_action(db, None, current_user, "Thêm danh mục", f"Loại: {cat.loai}, Tên: {cat.gia_tri}")
     return cat
 
 
@@ -48,7 +48,7 @@ def update_category(cat_id: int, data: CategoryCreate, db: Session = Depends(get
         setattr(cat, key, value)
     db.commit()
     db.refresh(cat)
-    log_action(db, None, current_user, "Cập nhật danh mục", f"ID: {cat.id}")
+    log_action(db, None, current_user, "Cập nhật danh mục", f"Loại: {cat.loai}, Tên mới: {cat.gia_tri}")
     return cat
 
 
@@ -60,5 +60,5 @@ def delete_category(cat_id: int, db: Session = Depends(get_db), current_user = D
         raise HTTPException(status_code=404, detail="Không tìm thấy danh mục")
     db.delete(cat)
     db.commit()
-    log_action(db, None, current_user, "Xoá danh mục", f"Tên: {cat.gia_tri}")
+    log_action(db, None, current_user, "Xoá danh mục", f"Loại: {cat.loai}, Tên: {cat.gia_tri}")
     return {"message": "Đã xoá danh mục"}

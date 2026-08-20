@@ -121,7 +121,7 @@ def create_issue(issue: IssueCreate, db: Session = Depends(get_db), current_user
         
     db.commit()
     db.refresh(new_issue)
-    log_action(db, None, current_user, "Tạo phiếu xuất", f"Mã phiếu: {ma_phieu}, Kho ID: {issue.kho_id}")
+    log_action(db, None, current_user, "Tạo phiếu xuất", f"Mã phiếu: {ma_phieu}, Kho ID: {issue.kho_id}, Gồm {len(issue.items)} mặt hàng, Tổng SL: {sum(i.so_luong for i in issue.items)}")
     return new_issue
 
 @router.get("/{id}")
@@ -196,5 +196,5 @@ def delete_issue(id: int, db: Session = Depends(get_db), current_user = Depends(
             
     db.delete(issue)
     db.commit()
-    log_action(db, None, current_user, "Xóa phiếu xuất", f"Mã phiếu: {issue.ma_phieu}")
+    log_action(db, None, current_user, "Xóa phiếu xuất", f"Mã phiếu: {issue.ma_phieu}, Gồm {len(issue.transactions)} mặt hàng, Tổng SL: {sum(t.so_luong for t in issue.transactions)}")
     return {"detail": "Đã xóa phiếu xuất và cập nhật tồn kho"}

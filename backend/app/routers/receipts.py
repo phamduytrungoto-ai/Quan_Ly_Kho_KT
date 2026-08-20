@@ -112,7 +112,7 @@ def create_receipt(receipt: ReceiptCreate, db: Session = Depends(get_db), curren
         
     db.commit()
     db.refresh(new_receipt)
-    log_action(db, None, current_user, "Tạo phiếu nhập", f"Mã phiếu: {ma_phieu}, Kho ID: {receipt.kho_id}")
+    log_action(db, None, current_user, "Tạo phiếu nhập", f"Mã phiếu: {ma_phieu}, Kho ID: {receipt.kho_id}, Gồm {len(receipt.items)} mặt hàng, Tổng SL: {sum(i.so_luong for i in receipt.items)}")
     return new_receipt
 
 @router.get("/{id}")
@@ -180,5 +180,5 @@ def delete_receipt(id: int, db: Session = Depends(get_db), current_user = Depend
             
     db.delete(receipt)
     db.commit()
-    log_action(db, None, current_user, "Xóa phiếu nhập", f"Mã phiếu: {receipt.ma_phieu}")
+    log_action(db, None, current_user, "Xóa phiếu nhập", f"Mã phiếu: {receipt.ma_phieu}, Gồm {len(receipt.transactions)} mặt hàng, Tổng SL: {sum(t.so_luong for t in receipt.transactions)}")
     return {"detail": "Đã xóa phiếu nhập và cập nhật tồn kho"}
