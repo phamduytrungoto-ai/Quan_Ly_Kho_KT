@@ -47,34 +47,52 @@ def require_permission(perm: str):
         return current_user
     return permission_checker
 
-def check_warehouse_access(user: models.User, kho_id: int):
-    if not kho_id or user.is_admin or getattr(user, 'allowed_kho_ids', '*') == '*':
+def check_warehouse_permission(user: models.User, kho_id: int, perm: str, db: Session = None):
+    if user.is_admin:
         return True
-    try:
-        allowed_str = getattr(user, 'allowed_kho_ids', '')
-        if not allowed_str:
-            raise HTTPException(status_code=403, detail="Bạn không được phân quyền vào bất kỳ kho nào")
-        allowed = [int(x.strip()) for x in allowed_str.split(',') if x.strip().isdigit()]
-        if int(kho_id) not in allowed:
-            raise HTTPException(status_code=403, detail="Bạn không có quyền truy cập kho này")
-    except HTTPException as e:
-        raise e
-    except Exception:
-        raise HTTPException(status_code=403, detail="Lỗi phân quyền kho")
+    
+    if not db:
+        raise HTTPException(status_code=500, detail="Database session required for permission check")
+
+    permission = db.query(models.UserWarehousePermission).filter(
+        models.UserWarehousePermission.user_id == user.id,
+        models.UserWarehousePermission.warehouse_id == kho_id
+    ).first()
+    
+    if not permission:
+        raise HTTPException(status_code=403, detail="Bạn không có quyền truy cập kho này.")
+        
+    has_perm = getattr(permission, perm, False)
+    if not has_perm:
+        raise HTTPException(status_code=403, detail=f"Bạn không có quyền thực hiện thao tác này tại kho được chọn.")
     return True
 
-def apply_warehouse_filter(query, model_class, user: models.User, kho_id: Optional[int] = None):
-    """Áp dụng filter theo kho, hoặc danh sách kho được phép nếu kho_id = None."""
+def get_allowed_warehouse_ids(user: models.User, db: Session, perm: str = 'perm_view'):
+    if user.is_admin:
+        return '*'
+    perms = db.query(models.UserWarehousePermission).filter(
+        models.UserWarehousePermission.user_id == user.id
+    ).all()
+    allowed = [p.warehouse_id for p in perms if getattr(p, perm, False)]
+    return allowed
+
+def check_warehouse_access(user: models.User, kho_id: int, db: Session):
+    if not kho_id or user.is_admin:
+        return True
+    check_warehouse_permission(user, kho_id, 'perm_view', db)
+    return True
+
+def apply_warehouse_filter(query, model_class, user: models.User, db: Session, kho_id: Optional[int] = None):
+    """Áp dụng filter theo kho."""
     if kho_id:
-        check_warehouse_access(user, kho_id)
+        check_warehouse_access(user, kho_id, db)
         return query.filter(model_class.kho_id == kho_id)
     
-    if user.is_admin or getattr(user, 'allowed_kho_ids', '*') == '*':
+    if user.is_admin:
         return query
         
-    allowed_str = getattr(user, 'allowed_kho_ids', '')
-    if not allowed_str:
+    allowed = get_allowed_warehouse_ids(user, db, 'perm_view')
+    if not allowed:
         return query.filter(model_class.kho_id == -1) # No access
         
-    allowed = [int(x.strip()) for x in allowed_str.split(',') if x.strip().isdigit()]
     return query.filter(model_class.kho_id.in_(allowed))

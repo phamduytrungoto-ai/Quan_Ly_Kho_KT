@@ -12,7 +12,7 @@ from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from .database import init_db, SessionLocal
-from .routers import inventory, transactions, categories, reports, receipts, issues, auth, users, settings, warehouses, transfers
+from .routers import inventory, transactions, categories, reports, receipts, issues, auth, users, settings, warehouses, transfers, logs
 from . import models, auth_utils
 from .scheduler import run_scheduler
 import asyncio
@@ -45,6 +45,7 @@ app.include_router(reports.router)
 app.include_router(settings.router)
 app.include_router(warehouses.router)
 app.include_router(transfers.router)
+app.include_router(logs.router)
 
 # Initialize database on startup
 @app.on_event("startup")

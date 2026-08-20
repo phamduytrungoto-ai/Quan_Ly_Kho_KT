@@ -7,7 +7,9 @@ from sqlalchemy import desc
 from ..database import get_db
 from ..models import Transfer, Transaction, Item, TransactionType
 from ..schemas import TransferCreate, TransferResponse
-from ..deps import require_permission, check_warehouse_access, get_current_user
+from ..deps import check_warehouse_permission, get_allowed_warehouse_ids
+from .. import deps
+from ..logger import log_action
 from sqlalchemy import or_
 
 router = APIRouter(prefix="/api/transfers", tags=["Chuyển kho"])
@@ -17,12 +19,12 @@ def list_transfers(
     tu_kho_id: Optional[int] = None,
     den_kho_id: Optional[int] = None,
     db: Session = Depends(get_db),
-    current_user = Depends(require_permission("perm_view"))
+    current_user = Depends(deps.get_current_user)
 ):
     if tu_kho_id:
-        check_warehouse_access(current_user, tu_kho_id)
+        check_warehouse_permission(current_user, tu_kho_id, "perm_view", db)
     if den_kho_id:
-        check_warehouse_access(current_user, den_kho_id)
+        check_warehouse_permission(current_user, den_kho_id, "perm_view", db)
     
     query = db.query(Transfer).order_by(desc(Transfer.id))
     if tu_kho_id:
@@ -30,23 +32,22 @@ def list_transfers(
     if den_kho_id:
         query = query.filter(Transfer.den_kho_id == den_kho_id)
         
-    if not current_user.is_admin and getattr(current_user, 'allowed_kho_ids', '*') != '*':
-        allowed_str = getattr(current_user, 'allowed_kho_ids', '')
-        if not allowed_str:
+    if not current_user.is_admin:
+        allowed = get_allowed_warehouse_ids(current_user, db, "perm_view")
+        if not allowed:
             query = query.filter(Transfer.id == -1)
         else:
-            allowed = [int(x.strip()) for x in allowed_str.split(',') if x.strip().isdigit()]
             query = query.filter(or_(Transfer.tu_kho_id.in_(allowed), Transfer.den_kho_id.in_(allowed)))
             
     return query.all()
 
 @router.post("", response_model=TransferResponse)
-def create_transfer(data: TransferCreate, db: Session = Depends(get_db), current_user = Depends(require_permission("perm_add"))):
+def create_transfer(data: TransferCreate, db: Session = Depends(get_db), current_user = Depends(deps.get_current_user)):
     if data.tu_kho_id == data.den_kho_id:
         raise HTTPException(status_code=400, detail="Kho xuất và kho nhập phải khác nhau")
         
     # User only needs permission for the source warehouse to create a transfer out
-    check_warehouse_access(current_user, data.tu_kho_id)
+    check_warehouse_permission(current_user, data.tu_kho_id, "perm_add", db)
         
     # Check ma phieu unique
     if db.query(Transfer).filter(Transfer.ma_phieu == data.ma_phieu).first():
@@ -146,16 +147,21 @@ def create_transfer(data: TransferCreate, db: Session = Depends(get_db), current
         db.add(tx_in)
         
     db.commit()
-    db.refresh(transfer)
-    return transfer
+    db.refresh(new_transfer)
+    log_action(db, None, current_user, "Tạo lệnh chuyển kho", f"Mã phiếu: {new_transfer.ma_phieu}")
+    return new_transfer
 
 @router.get("/{id}")
-def get_transfer(id: int, db: Session = Depends(get_db), current_user = Depends(require_permission("perm_view"))):
+def get_transfer(id: int, db: Session = Depends(get_db), current_user = Depends(deps.get_current_user)):
     transfer = db.query(Transfer).filter(Transfer.id == id).first()
     if not transfer:
-        raise HTTPException(status_code=404, detail="Không tìm thấy phiếu chuyển kho")
+        raise HTTPException(status_code=404, detail="Không tìm thấy phiếu chuyển")
         
-    check_warehouse_access(current_user, transfer.tu_kho_id)
+    # Check permission for either source or destination warehouse
+    try:
+        check_warehouse_permission(current_user, transfer.tu_kho_id, "perm_view", db)
+    except HTTPException:
+        check_warehouse_permission(current_user, transfer.den_kho_id, "perm_view", db)
     
     # We only take EXPORT transactions to avoid counting items twice (import and export)
     txs = [t for t in transfer.transactions if t.loai == TransactionType.EXPORT]
@@ -197,7 +203,7 @@ def get_transfer(id: int, db: Session = Depends(get_db), current_user = Depends(
     }
 
 @router.get("/{id}/export-excel")
-def export_transfer_excel(id: int, db: Session = Depends(get_db), current_user = Depends(require_permission("perm_view"))):
+def export_transfer_excel(id: int, db: Session = Depends(get_db), current_user = Depends(deps.get_current_user)):
     from fastapi.responses import StreamingResponse
     from app.excel_utils import generate_receipt_excel
     import urllib.parse
@@ -217,12 +223,13 @@ def export_transfer_excel(id: int, db: Session = Depends(get_db), current_user =
     )
 
 @router.delete("/{id}")
-def delete_transfer(id: int, db: Session = Depends(get_db), current_user = Depends(require_permission("perm_delete"))):
+def delete_transfer(id: int, db: Session = Depends(get_db), current_user = Depends(deps.get_current_user)):
     transfer = db.query(Transfer).filter(Transfer.id == id).first()
     if not transfer:
-        raise HTTPException(status_code=404, detail="Không tìm thấy phiếu chuyển kho")
+        raise HTTPException(status_code=404, detail="Không tìm thấy phiếu chuyển")
         
-    check_warehouse_access(current_user, transfer.tu_kho_id)
+    # Check permission for the source warehouse to delete
+    check_warehouse_permission(current_user, transfer.tu_kho_id, "perm_delete", db)
         
     # Revert inventory for each transaction
     txs = db.query(Transaction).filter(Transaction.transfer_id == id).all()
@@ -238,4 +245,5 @@ def delete_transfer(id: int, db: Session = Depends(get_db), current_user = Depen
                 
     db.delete(transfer)
     db.commit()
-    return {"detail": "Đã xóa phiếu chuyển kho và hoàn lại tồn kho"}
+    log_action(db, None, current_user, "Xoá lệnh chuyển kho", f"Mã phiếu: {transfer.ma_phieu}")
+    return {"detail": "Đã xóa phiếu chuyển kho và khôi phục tồn kho"}

@@ -176,6 +176,34 @@ class Category(Base):
     mo_ta = Column(String(500), default="")                # Description
     thu_tu = Column(Integer, default=0)                    # Sort order
 
+class UserWarehousePermission(Base):
+    __tablename__ = 'user_warehouse_permissions'
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    warehouse_id = Column(Integer, ForeignKey("warehouses.id", ondelete="CASCADE"), nullable=False, index=True)
+    perm_view = Column(Boolean, default=True)
+    perm_add = Column(Boolean, default=False)
+    perm_edit = Column(Boolean, default=False)
+    perm_delete = Column(Boolean, default=False)
+    perm_approve = Column(Boolean, default=False)
+    perm_print = Column(Boolean, default=False)
+    perm_excel = Column(Boolean, default=False)
+    
+    # Relationships
+    user = relationship("User", back_populates="permissions")
+    warehouse = relationship("Warehouse")
+
+class ActionLog(Base):
+    """Bảng ghi nhận lịch sử thao tác của người dùng"""
+    __tablename__ = 'action_logs'
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
+    username = Column(String(100), index=True)
+    action = Column(String(200), nullable=False)
+    details = Column(Text, default="")
+    ip_address = Column(String(50), default="")
+    created_at = Column(DateTime, default=datetime.now)
+
 class User(Base):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True, index=True)
@@ -184,6 +212,7 @@ class User(Base):
     hashed_password = Column(String)
     full_name = Column(String, nullable=True)
     role = Column(String, default='Nhân viên')
+    # Các trường perm_* cũ được giữ lại như quyền mặc định/legacy
     perm_view = Column(Boolean, default=True)
     perm_add = Column(Boolean, default=False)
     perm_edit = Column(Boolean, default=False)
@@ -194,9 +223,12 @@ class User(Base):
     is_admin = Column(Boolean, default=False)
     is_active = Column(Boolean, default=True)
     allowed_kho_ids = Column(String, default="*")
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.now)
     reset_otp = Column(String, nullable=True)
     reset_otp_expire = Column(DateTime, nullable=True)
+    
+    # Relationships
+    permissions = relationship("UserWarehousePermission", back_populates="user", cascade="all, delete-orphan")
 
 class Setting(Base):
     __tablename__ = 'settings'

@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Hệ thống Quản lý Kho - SMV Professional">
     <title>SMV - Quản lý Kho</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 512' fill='%232563eb'%3E%3Cpath d='M504 352H136.4c-4.4 0-8 3.6-8 8l-.1 48c0 4.4 3.6 8 8 8H504c4.4 0 8-3.6 8-8v-48c0-4.4-3.6-8-8-8zm0 96H136.1c-4.4 0-8 3.6-8 8l-.1 48c0 4.4 3.6 8 8 8h368c4.4 0 8-3.6 8-8v-48c0-4.4-3.6-8-8-8zm0-192H136.6c-4.4 0-8 3.6-8 8l-.1 48c0 4.4 3.6 8 8 8H504c4.4 0 8-3.6 8-8v-48c0-4.4-3.6-8-8-8zm106.5-139L338.4 3.7a63.9 63.9 0 0 0 -36.9 0L29.5 117C11.7 124.5 0 141.9 0 161.3V512h96V161.3l224-84 224 84V512h96V161.3c0-19.4-11.7-36.8-29.5-44.3z'/%3E%3C/svg%3E">
     <script>
         // Apply saved theme immediately to prevent flash
         (function () {
@@ -133,6 +134,9 @@
                 </a>
                 <a href="#" class="nav-item" data-page="users" id="nav-users" style="display: none;">
                     <i class="fas fa-users-cog"></i><span>Phân quyền</span>
+                </a>
+                <a href="#" class="nav-item" data-page="action_logs" id="nav-logs" style="display: none;">
+                    <i class="fas fa-list-alt"></i><span>Lịch sử thao tác</span>
                 </a>
                 <div style="height: 1px; background: var(--border-color); margin: 8px 16px;"></div>
                 <a href="#" id="btnUserGuide" class="nav-item text-info">
@@ -266,6 +270,7 @@
     <script src="/js/pages/settings.js?v=3"></script>
     <script src="/js/pages/warehouses.js?v=3"></script>
     <script src="/js/pages/transfers.js?v=3"></script>
+    <script src="/js/pages/action_logs.js?v=3"></script>
 
     <script src="/js/auth.js?v=3"></script>
     <script src="/js/app.js?v=3"></script>

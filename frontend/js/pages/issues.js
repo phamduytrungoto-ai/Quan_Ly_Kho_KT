@@ -658,7 +658,10 @@ const IssuesPage = {
         try {
             const issue = await api.issues.get(id);
             
-            let itemsHtml = issue.transactions.map((t, index) => `
+            let itemsHtml = issue.transactions.map((t, index) => {
+                const isCapMoi = (t.loai_xuat === 'Cấp mới' || t.loai_xuat === 'Cấp Mới');
+                const isThayThe = (t.loai_xuat === 'Thay thế' || t.loai_xuat === 'Thay Thế');
+                return `
                 <tr>
                     <td>${index + 1}</td>
                     <td>${t.ma_so}</td>
@@ -666,8 +669,11 @@ const IssuesPage = {
                     <td class="text-right">${utils.formatNumber(t.so_luong)}</td>
                     <td>${t.don_vi_tinh}</td>
                     <td>${t.cong_doan || ''}</td>
+                    <td class="text-center">${isCapMoi ? '<i class="fas fa-check text-success"></i>' : ''}</td>
+                    <td class="text-center">${isThayThe ? '<i class="fas fa-check text-warning"></i>' : ''}</td>
                 </tr>
-            `).join('');
+            `;
+            }).join('');
 
             const content = `
                 <div class="issue-detail">
@@ -697,6 +703,8 @@ const IssuesPage = {
                                     <th class="text-right">Số Lượng</th>
                                     <th>ĐVT</th>
                                     <th>Công Đoạn</th>
+                                    <th class="text-center">Cấp mới</th>
+                                    <th class="text-center">Thay thế</th>
                                 </tr>
                             </thead>
                             <tbody>

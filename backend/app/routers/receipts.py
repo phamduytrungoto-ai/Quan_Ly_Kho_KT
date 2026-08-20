@@ -4,7 +4,9 @@ from sqlalchemy import or_, func, desc
 from typing import Optional
 from datetime import date
 
-from ..deps import require_permission, apply_warehouse_filter, check_warehouse_access
+from .. import deps
+from ..deps import apply_warehouse_filter, check_warehouse_access, check_warehouse_permission
+from ..logger import log_action
 from ..database import get_db
 from ..models import Item, Transaction, Receipt, TransactionType
 from ..schemas import ReceiptCreate, ReceiptResponse, ReceiptListResponse
@@ -32,10 +34,10 @@ def list_receipts(
     to_date: Optional[date] = None,
     kho_id: Optional[int] = None,
     db: Session = Depends(get_db),
-    current_user = Depends(require_permission("perm_view"))
+    current_user = Depends(deps.get_current_user)
 ):
     query = db.query(Receipt)
-    query = apply_warehouse_filter(query, Receipt, current_user, kho_id)
+    query = apply_warehouse_filter(query, Receipt, current_user, db, kho_id)
     
     if search:
         search_lower = search.lower()
@@ -64,10 +66,10 @@ def list_receipts(
     }
 
 @router.post("", response_model=ReceiptResponse)
-def create_receipt(receipt: ReceiptCreate, db: Session = Depends(get_db), current_user = Depends(require_permission("perm_add"))):
+def create_receipt(receipt: ReceiptCreate, db: Session = Depends(get_db), current_user = Depends(deps.get_current_user)):
     if not receipt.items:
         raise HTTPException(status_code=400, detail="Phiếu nhập phải có ít nhất 1 mặt hàng")
-    check_warehouse_access(current_user, receipt.kho_id)
+    check_warehouse_permission(current_user, receipt.kho_id, "perm_add", db)
         
     ma_phieu = generate_receipt_code(db)
     
@@ -110,15 +112,16 @@ def create_receipt(receipt: ReceiptCreate, db: Session = Depends(get_db), curren
         
     db.commit()
     db.refresh(new_receipt)
+    log_action(db, None, current_user, "Tạo phiếu nhập", f"Mã phiếu: {ma_phieu}, Kho ID: {receipt.kho_id}")
     return new_receipt
 
 @router.get("/{id}")
-def get_receipt(id: int, db: Session = Depends(get_db), current_user = Depends(require_permission("perm_view"))):
+def get_receipt(id: int, db: Session = Depends(get_db), current_user = Depends(deps.get_current_user)):
     receipt = db.query(Receipt).filter(Receipt.id == id).first()
     if not receipt:
         raise HTTPException(status_code=404, detail="Không tìm thấy phiếu nhập")
         
-    check_warehouse_access(current_user, receipt.kho_id)
+    check_warehouse_permission(current_user, receipt.kho_id, "perm_view", db)
     
     return {
         "id": receipt.id,
@@ -143,7 +146,7 @@ def get_receipt(id: int, db: Session = Depends(get_db), current_user = Depends(r
     }
 
 @router.get("/{id}/export-excel")
-def export_receipt_excel(id: int, db: Session = Depends(get_db), current_user = Depends(require_permission("perm_view"))):
+def export_receipt_excel(id: int, db: Session = Depends(get_db), current_user = Depends(deps.get_current_user)):
     from fastapi.responses import StreamingResponse
     from app.excel_utils import generate_receipt_excel
     import urllib.parse
@@ -163,10 +166,11 @@ def export_receipt_excel(id: int, db: Session = Depends(get_db), current_user = 
     )
 
 @router.delete("/{id}")
-def delete_receipt(id: int, db: Session = Depends(get_db), _=Depends(require_permission("perm_delete"))):
+def delete_receipt(id: int, db: Session = Depends(get_db), current_user = Depends(deps.get_current_user)):
     receipt = db.query(Receipt).filter(Receipt.id == id).first()
     if not receipt:
         raise HTTPException(status_code=404, detail="Không tìm thấy phiếu nhập")
+    check_warehouse_permission(current_user, receipt.kho_id, "perm_delete", db)
         
     for trans in receipt.transactions:
         item = db.query(Item).filter(Item.id == trans.item_id).first()
@@ -176,4 +180,5 @@ def delete_receipt(id: int, db: Session = Depends(get_db), _=Depends(require_per
             
     db.delete(receipt)
     db.commit()
+    log_action(db, None, current_user, "Xóa phiếu nhập", f"Mã phiếu: {receipt.ma_phieu}")
     return {"detail": "Đã xóa phiếu nhập và cập nhật tồn kho"}

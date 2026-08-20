@@ -57,16 +57,29 @@ def _github_headers():
 def fetch_url(req, timeout=15):
     """Gửi request có hỗ trợ fallback proxy mạng công ty Sharp."""
     import urllib.request
+    import ssl
+    
+    ctx = ssl.create_default_context()
+    ctx.check_hostname = False
+    ctx.verify_mode = ssl.CERT_NONE
     
     # 1. Thử kết nối trực tiếp (dành cho mạng ở nhà/4G)
     try:
-        opener_no_proxy = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+        opener_no_proxy = urllib.request.build_opener(
+            urllib.request.ProxyHandler({}),
+            urllib.request.HTTPSHandler(context=ctx)
+        )
         return opener_no_proxy.open(req, timeout=timeout)
     except Exception as e1:
         # 2. Thử kết nối qua Proxy (dành cho mạng công ty)
         try:
-            proxy_url = "http://proxy-asia.global.sharp:3080"
-            opener_proxy = urllib.request.build_opener(urllib.request.ProxyHandler({'http': proxy_url, 'https': proxy_url}))
+            proxy_url = os.getenv("PROXY_URL")
+            if not proxy_url:
+                proxy_url = "http://proxy-asia.global.sharp:3080"
+            opener_proxy = urllib.request.build_opener(
+                urllib.request.ProxyHandler({'http': proxy_url, 'https': proxy_url}),
+                urllib.request.HTTPSHandler(context=ctx)
+            )
             return opener_proxy.open(req, timeout=timeout)
         except Exception as e2:
             raise Exception(f"Direct: {repr(e1)} | Proxy: {repr(e2)}")

@@ -1,5 +1,5 @@
 from datetime import timedelta, datetime
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from .. import models, schemas, auth_utils, database, deps
@@ -9,7 +9,7 @@ from sqlalchemy import func
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 @router.post("/login", response_model=schemas.Token)
-def login_for_access_token(db: Session = Depends(database.get_db), form_data: OAuth2PasswordRequestForm = Depends()):
+def login_for_access_token(request: Request, db: Session = Depends(database.get_db), form_data: OAuth2PasswordRequestForm = Depends()):
     user = db.query(models.User).filter(func.lower(models.User.username) == form_data.username.lower()).first()
     if not user or not auth_utils.verify_password(form_data.password, user.hashed_password):
         raise HTTPException(
@@ -24,11 +24,22 @@ def login_for_access_token(db: Session = Depends(database.get_db), form_data: OA
     access_token = auth_utils.create_access_token(
         data={"sub": user.username}, expires_delta=access_token_expires
     )
+    
+    # Ghi log đăng nhập
+    from ..logger import log_action
+    log_action(db, request, user, "Đăng nhập", f"Tài khoản: {user.username}")
+    
     return {"access_token": access_token, "token_type": "bearer"}
 
 @router.get("/me", response_model=schemas.UserResponse)
 def read_users_me(current_user: models.User = Depends(deps.get_current_user)):
     return current_user
+
+@router.post("/logout")
+def logout_user(request: Request, current_user: models.User = Depends(deps.get_current_user), db: Session = Depends(database.get_db)):
+    from ..logger import log_action
+    log_action(db, request, current_user, "Đăng xuất", f"Tài khoản: {current_user.username}")
+    return {"message": "Đăng xuất thành công"}
 
 import random
 import string

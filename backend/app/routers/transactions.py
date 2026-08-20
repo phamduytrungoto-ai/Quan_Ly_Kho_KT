@@ -37,7 +37,7 @@ def list_transactions(
     """Lấy danh sách giao dịch nhập/xuất kho."""
     query = db.query(Transaction)
     
-    query = apply_warehouse_filter(query, Transaction, current_user, kho_id)
+    query = apply_warehouse_filter(query, Transaction, current_user, db, kho_id)
 
     # Type filter
     if loai:

@@ -5,7 +5,8 @@ from typing import List
 from ..database import get_db
 from ..models import Warehouse, Item
 from ..schemas import WarehouseCreate, WarehouseUpdate, WarehouseResponse
-from ..deps import require_permission
+from ..deps import get_current_admin
+from ..logger import log_action
 
 router = APIRouter(prefix="/api/warehouses", tags=["Kho"])
 
@@ -14,7 +15,7 @@ def list_warehouses(db: Session = Depends(get_db)):
     return db.query(Warehouse).all()
 
 @router.post("", response_model=WarehouseResponse)
-def create_warehouse(warehouse: WarehouseCreate, db: Session = Depends(get_db)):
+def create_warehouse(warehouse: WarehouseCreate, db: Session = Depends(get_db), current_user = Depends(get_current_admin)):
     # Check duplicate
     existing = db.query(Warehouse).filter(Warehouse.ma_kho == warehouse.ma_kho).first()
     if existing:
@@ -24,10 +25,11 @@ def create_warehouse(warehouse: WarehouseCreate, db: Session = Depends(get_db)):
     db.add(db_wh)
     db.commit()
     db.refresh(db_wh)
+    log_action(db, None, current_user, "Thêm kho mới", f"Mã kho: {db_wh.ma_kho}")
     return db_wh
 
 @router.put("/{id}", response_model=WarehouseResponse)
-def update_warehouse(id: int, warehouse: WarehouseUpdate, db: Session = Depends(get_db)):
+def update_warehouse(id: int, warehouse: WarehouseUpdate, db: Session = Depends(get_db), current_user = Depends(get_current_admin)):
     db_wh = db.query(Warehouse).filter(Warehouse.id == id).first()
     if not db_wh:
         raise HTTPException(status_code=404, detail="Không tìm thấy kho")
@@ -48,10 +50,11 @@ def update_warehouse(id: int, warehouse: WarehouseUpdate, db: Session = Depends(
     
     db.commit()
     db.refresh(db_wh)
+    log_action(db, None, current_user, "Cập nhật thông tin kho", f"Mã kho: {db_wh.ma_kho}")
     return db_wh
 
 @router.delete("/{id}")
-def delete_warehouse(id: int, db: Session = Depends(get_db)):
+def delete_warehouse(id: int, db: Session = Depends(get_db), current_user = Depends(get_current_admin)):
     if id == 1:
         raise HTTPException(status_code=400, detail="Không thể xóa Kho Tổng mặc định")
     db_wh = db.query(Warehouse).filter(Warehouse.id == id).first()
@@ -65,4 +68,5 @@ def delete_warehouse(id: int, db: Session = Depends(get_db)):
         
     db.delete(db_wh)
     db.commit()
+    log_action(db, None, current_user, "Xoá kho", f"Mã kho: {db_wh.ma_kho}")
     return {"detail": "Đã xóa kho thành công"}

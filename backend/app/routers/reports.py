@@ -27,8 +27,8 @@ def get_dashboard(kho_id: Optional[int] = None, db: Session = Depends(get_db), c
     item_query = db.query(Item)
     txn_query = db.query(Transaction)
     
-    item_query = apply_warehouse_filter(item_query, Item, current_user, kho_id)
-    txn_query = apply_warehouse_filter(txn_query, Transaction, current_user, kho_id)
+    item_query = apply_warehouse_filter(item_query, Item, current_user, db, kho_id)
+    txn_query = apply_warehouse_filter(txn_query, Transaction, current_user, db, kho_id)
 
     total_items = item_query.with_entities(func.count(Item.id)).scalar() or 0
     total_imports_today = (
@@ -196,7 +196,7 @@ def export_inventory_excel(
 
     # Data query
     query = db.query(Item)
-    query = apply_warehouse_filter(query, Item, current_user, kho_id)
+    query = apply_warehouse_filter(query, Item, current_user, db, kho_id)
 
     # Search
     if search:
@@ -288,7 +288,7 @@ def api_send_warning_email(
         query = db.query(Item).filter(
             Item.ton_cuoi <= Item.dinh_muc
         )
-        query = apply_warehouse_filter(query, Item, current_user, request.kho_id)
+        query = apply_warehouse_filter(query, Item, current_user, db, request.kho_id)
         items = query.all()
         
         # Lấy thông tin kho để hiển thị tên

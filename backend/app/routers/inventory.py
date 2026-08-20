@@ -12,8 +12,10 @@ from typing import Optional
 from datetime import date
 from sqlalchemy import or_, func, literal_column
 
-from ..deps import require_permission, apply_warehouse_filter, check_warehouse_access
+from .. import deps
+from ..deps import apply_warehouse_filter, check_warehouse_access, check_warehouse_permission
 from ..database import get_db
+from ..logger import log_action
 from ..models import Item, Transaction
 from ..schemas import (
     ItemCreate, ItemUpdate, ItemResponse,
@@ -39,11 +41,11 @@ def list_items(
     kho_id: Optional[int] = None,
     loai_vat_tu: Optional[str] = None,
     db: Session = Depends(get_db),
-    current_user = Depends(require_permission("perm_view"))
+    current_user = Depends(deps.get_current_user)
 ):
     """Lấy danh sách tồn kho với phân trang, tìm kiếm, lọc."""
     query = db.query(Item)
-    query = apply_warehouse_filter(query, Item, current_user, kho_id)
+    query = apply_warehouse_filter(query, Item, current_user, db, kho_id)
 
     # Search
     if search:
@@ -153,12 +155,12 @@ def list_all_items(
     search: Optional[str] = None,
     kho_id: Optional[int] = None,
     db: Session = Depends(get_db),
-    current_user = Depends(require_permission("perm_view"))
+    current_user = Depends(deps.get_current_user)
 ):
     """Lấy tất cả items (cho autocomplete). Trả về id, ten_hang, ma_so, don_vi_tinh, ton_cuoi."""
     query = db.query(Item.id, Item.ten_hang, Item.ma_so, Item.don_vi_tinh, Item.ton_cuoi, Item.ma_quan_ly)
     
-    query = apply_warehouse_filter(query, Item, current_user, kho_id)
+    query = apply_warehouse_filter(query, Item, current_user, db, kho_id)
     
     if search:
         search_lower = search.lower()
@@ -183,19 +185,17 @@ def list_all_items(
 
 
 @router.get("/{item_id}", response_model=ItemResponse)
-def get_item(item_id: int, db: Session = Depends(get_db), current_user = Depends(require_permission("perm_view"))):
-    """Láº¥y chi tiáº¿t 1 máº·t hÃ ng."""
+def get_item(item_id: int, db: Session = Depends(get_db), current_user = Depends(deps.get_current_user)):
     item = db.query(Item).filter(Item.id == item_id).first()
     if not item:
-        raise HTTPException(status_code=404, detail="KhÃ´ng tÃ¬m tháº¥y máº·t hÃ ng")
-    check_warehouse_access(current_user, item.kho_id)
+        raise HTTPException(status_code=404, detail="Khong tim thay Item")
+    check_warehouse_permission(current_user, item.kho_id, "perm_view", db)
     return item
 
 
 @router.post("", response_model=ItemResponse, status_code=201)
-def create_item(data: ItemCreate, db: Session = Depends(get_db), current_user = Depends(require_permission("perm_add"))):
-    """Thêm mặt hàng mới."""
-    check_warehouse_access(current_user, data.kho_id)
+def create_item(data: ItemCreate, db: Session = Depends(get_db), current_user = Depends(deps.get_current_user)):
+    check_warehouse_permission(current_user, data.kho_id, "perm_add", db)
     # Check if duplicate in the same warehouse
     kho_id = data.kho_id if data.kho_id else 1
     existing = db.query(Item).filter(
@@ -207,23 +207,21 @@ def create_item(data: ItemCreate, db: Session = Depends(get_db), current_user = 
             status_code=400,
             detail=f"Mặt hàng với mã số {data.ma_so} đã tồn tại trong kho này."
         )
-    db_item = Item(**data.model_dump())
-    db_item.ton_cuoi = db_item.ton_dau
-    db.add(db_item)
+    new_item = Item(**data.model_dump())
+    new_item.ton_cuoi = new_item.ton_dau
+    db.add(new_item)
     db.commit()
-    db.refresh(db_item)
-    return db_item
+    db.refresh(new_item)
+    log_action(db, None, current_user, "Thêm hàng hóa", f"Mã quản lý: {new_item.ma_quan_ly}, Mã số: {new_item.ma_so}")
+    return new_item
 
 
 @router.put("/{item_id}", response_model=ItemResponse)
-def update_item(item_id: int, data: ItemUpdate, db: Session = Depends(get_db), current_user = Depends(require_permission("perm_edit"))):
-    """Cập nhật thông tin mặt hàng."""
+def update_item(item_id: int, data: ItemUpdate, db: Session = Depends(get_db), current_user = Depends(deps.get_current_user)):
     item = db.query(Item).filter(Item.id == item_id).first()
     if not item:
-        raise HTTPException(status_code=404, detail="Không tìm thấy mặt hàng")
-    check_warehouse_access(current_user, item.kho_id)
-    if data.kho_id is not None:
-        check_warehouse_access(current_user, data.kho_id)
+        raise HTTPException(status_code=404, detail="Item not found")
+    check_warehouse_permission(current_user, item.kho_id, "perm_edit", db)
 
     if data.ma_so:
         existing = db.query(Item).filter(
@@ -243,6 +241,7 @@ def update_item(item_id: int, data: ItemUpdate, db: Session = Depends(get_db), c
 
     db.commit()
     db.refresh(item)
+    log_action(db, None, current_user, "Cập nhật hàng hóa", f"ID: {item.id}, Mã: {item.ma_so}")
     return item
 
 
@@ -250,12 +249,12 @@ def update_item(item_id: int, data: ItemUpdate, db: Session = Depends(get_db), c
 def delete_item(
     item_id: int, 
     db: Session = Depends(get_db),
-    current_user = Depends(require_permission("perm_delete"))
+    current_user = Depends(deps.get_current_user)
 ):
     item = db.query(Item).filter(Item.id == item_id).first()
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
-    check_warehouse_access(current_user, item.kho_id)
+    check_warehouse_permission(current_user, item.kho_id, "perm_delete", db)
 
     # Check if there are transactions
     has_transactions = db.query(Transaction).filter(Transaction.item_id == item_id).first() is not None
@@ -264,19 +263,20 @@ def delete_item(
 
     db.delete(item)
     db.commit()
-    return {"message": "Item deleted successfully"}
+    log_action(db, None, current_user, "Xóa hàng hóa", f"Mã: {item.ma_so}")
+    return {"message": "Deleted successfully"}
 
 @router.post("/{item_id}/image")
 def upload_item_image(
     item_id: int,
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
-    current_user = Depends(require_permission("perm_edit"))
+    current_user = Depends(deps.get_current_user)
 ):
     item = db.query(Item).filter(Item.id == item_id).first()
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
-    check_warehouse_access(current_user, item.kho_id)
+    check_warehouse_permission(current_user, item.kho_id, "perm_edit", db)
 
     # Validate file type
     allowed_extensions = {".jpg", ".jpeg", ".png", ".gif", ".webp"}
@@ -312,8 +312,71 @@ def upload_item_image(
     
     new_url = f"/uploads/items/{unique_filename}"
     images.append(new_url)
-    
     item.hinh_anh = json.dumps(images)
     db.commit()
 
     return {"message": "Image uploaded successfully", "url": new_url, "images": images}
+
+@router.post("/import")
+async def import_excel(
+    file: UploadFile = File(...),
+    kho_id: int = Query(1),
+    db: Session = Depends(get_db),
+    current_user = Depends(deps.get_current_user)
+):
+    check_warehouse_permission(current_user, kho_id, "perm_add", db)
+    
+    if not file.filename.endswith(('.xlsx', '.xls')):
+        raise HTTPException(status_code=400, detail="Chỉ hỗ trợ file Excel (.xlsx, .xls)")
+        
+    import pandas as pd
+    import io
+    
+    contents = await file.read()
+    try:
+        df = pd.read_excel(io.BytesIO(contents))
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Lỗi đọc file Excel: {str(e)}")
+        
+    success_count = 0
+    skip_count = 0
+    
+    for index, row in df.iterrows():
+        ma_so = str(row.get('Mã số', '')).strip()
+        if not ma_so or ma_so == 'nan':
+            ma_so = str(row.get('Part No.', '')).strip()
+        if not ma_so or ma_so == 'nan':
+            continue
+            
+        ten_hang = str(row.get('Tên hàng', '')).strip()
+        if ten_hang == 'nan': ten_hang = ''
+        
+        # Check existing
+        existing = db.query(Item).filter(Item.ma_so == ma_so, Item.kho_id == kho_id).first()
+        if existing:
+            skip_count += 1
+            continue
+            
+        try:
+            ton_dau = int(float(row.get('Tồn kho', 0)))
+        except:
+            ton_dau = 0
+            
+        new_item = Item(
+            ma_so=ma_so,
+            ten_hang=ten_hang,
+            kho_id=kho_id,
+            ton_dau=ton_dau,
+            ton_cuoi=ton_dau,
+            ma_quan_ly=str(row.get('Mã quản lý', '')).replace('nan', ''),
+            don_vi_tinh=str(row.get('ĐVT', 'PCS')).replace('nan', ''),
+            vi_tri=str(row.get('Vị trí', '')).replace('nan', ''),
+            ghi_chu=str(row.get('Ghi chú', '')).replace('nan', '')
+        )
+        db.add(new_item)
+        success_count += 1
+        
+    db.commit()
+    log_action(db, None, current_user, "Nhập tồn kho từ Excel", f"Kho ID: {kho_id}, Thành công: {success_count}, Bỏ qua: {skip_count}")
+    
+    return {"message": f"Nhập thành công {success_count} mã hàng, bỏ qua {skip_count} mã hàng"}

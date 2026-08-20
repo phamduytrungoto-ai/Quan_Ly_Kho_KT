@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Trang Lịch sử nhập xuất kho (History)
  */
 const HistoryPage = {
@@ -9,16 +9,8 @@ const HistoryPage = {
 
     async render(container) {
         const html = `
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; position: relative;">
-                <h2 style="text-align: center; width: 100%; font-size: 1.8rem; font-weight: bold; margin: 0; color: var(--text-heading);">LỊCH SỬ NHẬP XUẤT KHO</h2>
-                <div style="position: absolute; right: 0; display: flex; gap: 10px;">
-                    <button class="btn btn-success" id="btnGoToImport">
-                        <i class="fas fa-plus"></i> Tạo phiếu nhập
-                    </button>
-                    <button class="btn btn-warning" id="btnGoToExport">
-                        <i class="fas fa-minus"></i> Tạo phiếu xuất
-                    </button>
-                </div>
+            <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 20px;">
+                <h2 style="font-size: 1.8rem; font-weight: bold; margin: 0; color: var(--text-heading);">LỊCH SỬ NHẬP XUẤT KHO</h2>
             </div>
 
             <div class="tabs-container mb-4" style="border-bottom: 1px solid var(--border-color); display: flex; gap: 20px;">
@@ -114,23 +106,6 @@ const HistoryPage = {
                 this.loadData();
             });
         });
-
-        // Toggle Form Redirects
-        const btnGoToImport = document.querySelector('#page-history #btnGoToImport');
-        if (btnGoToImport) {
-            btnGoToImport.addEventListener('click', () => {
-                sessionStorage.setItem('openReceiptForm', 'true');
-                window.location.hash = '#receipts';
-            });
-        }
-
-        const btnGoToExport = document.querySelector('#page-history #btnGoToExport');
-        if (btnGoToExport) {
-            btnGoToExport.addEventListener('click', () => {
-                sessionStorage.setItem('openIssueForm', 'true');
-                window.location.hash = '#issues';
-            });
-        }
 
         // Search history & Autocomplete
         const searchHistory = document.querySelector('#page-history #searchHistory');

@@ -320,6 +320,19 @@ class IssueListResponse(BaseModel):
 
 # ========== User Schemas (Ng??i d?ng) ==========
 
+class UserWarehousePermissionSchema(BaseModel):
+    warehouse_id: int
+    perm_view: bool = False
+    perm_add: bool = False
+    perm_edit: bool = False
+    perm_delete: bool = False
+    perm_approve: bool = False
+    perm_print: bool = False
+    perm_excel: bool = False
+
+    class Config:
+        from_attributes = True
+
 class UserBase(BaseModel):
     username: str
     email: Optional[str] = None
@@ -335,6 +348,7 @@ class UserBase(BaseModel):
     is_admin: bool = False
     is_active: bool = True
     allowed_kho_ids: str = "*"
+    permissions: Optional[List[UserWarehousePermissionSchema]] = None
 
 class UserCreate(UserBase):
     password: str
@@ -354,6 +368,7 @@ class UserUpdate(BaseModel):
     is_admin: Optional[bool] = None
     is_active: Optional[bool] = None
     allowed_kho_ids: Optional[str] = None
+    permissions: Optional[List[UserWarehousePermissionSchema]] = None
 
 class UserResponse(UserBase):
     id: int

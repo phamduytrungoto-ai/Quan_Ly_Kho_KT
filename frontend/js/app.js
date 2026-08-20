@@ -13,7 +13,8 @@ const App = {
         'issues': IssuesPage,
         'users': UsersPage,
         'warehouses': WarehousesPage,
-        'transfers': TransfersPage
+        'transfers': TransfersPage,
+        'action_logs': ActionLogsPage
     },
     
     currentPage: null,
@@ -47,6 +48,7 @@ const App = {
         if (window.Auth.user.is_admin) {
             document.getElementById('nav-users').style.display = 'flex';
             document.getElementById('nav-warehouses').style.display = 'flex';
+            document.getElementById('nav-logs').style.display = 'flex';
             document.getElementById('btnSettings').style.display = 'flex';
             
             // Xử lý nút Cài đặt
@@ -444,11 +446,12 @@ const App = {
             
             // Check allowed
             let allowed = [];
-            if (window.Auth.user.is_admin || window.Auth.user.allowed_kho_ids === '*') {
+            if (window.Auth.user.is_admin) {
                 allowed = warehouses;
             } else {
-                const ids = (window.Auth.user.allowed_kho_ids || '1').split(',').map(x => parseInt(x.trim()));
-                allowed = warehouses.filter(w => ids.includes(w.id));
+                const perms = window.Auth.user.permissions || [];
+                const allowedIds = perms.filter(p => p.perm_view).map(p => p.warehouse_id);
+                allowed = warehouses.filter(w => allowedIds.includes(w.id));
             }
             
             if (allowed.length > 0) {
@@ -471,9 +474,8 @@ const App = {
                 
                 selector.addEventListener('change', (e) => {
                     localStorage.setItem('active_kho_id', e.target.value);
-                    // Reload current page
-                    const hash = window.location.hash.substring(1) || 'dashboard';
-                    this.navigate(hash, true); // force re-render
+                    // Reload the full page to apply warehouse change everywhere cleanly
+                    window.location.reload();
                 });
             }
         } catch(e) {

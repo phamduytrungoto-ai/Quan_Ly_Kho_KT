@@ -1,0 +1,104 @@
+INFO:     Started server process [24224]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8888 (Press CTRL+C to quit)
+Database initialized
+Email scheduler started
+WMS Server is running!
+INFO:     127.0.0.1:57072 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57072 - "GET /js/utils.js?v=3 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:56884 - "GET /js/components/charts.js?v=3 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:57072 - "GET /js/pages/inventory.js?v=3 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:57072 - "GET /js/pages/history.js?v=3 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:56884 - "GET /js/pages/issues.js?v=3 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:57072 - "GET /js/pages/settings.js?v=3 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:56884 - "GET /js/pages/action_logs.js?v=3 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:57072 - "GET /js/app.js?v=3 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:52085 - "GET /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56063 - "GET /api/logs?page=1&page_size=50 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54098 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54098 - "GET /js/utils.js?v=3 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:55222 - "GET /js/components/charts.js?v=3 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:58382 - "GET /js/pages/history.js?v=3 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:53074 - "GET /js/pages/inventory.js?v=3 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:54098 - "GET /js/pages/issues.js?v=3 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:55222 - "GET /js/pages/settings.js?v=3 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:58382 - "GET /js/pages/action_logs.js?v=3 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:53074 - "GET /js/app.js?v=3 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:62938 - "POST /api/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62938 - "GET /api/auth/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62938 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62938 - "GET /js/components/charts.js?v=3 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:63405 - "GET /js/pages/settings.js?v=3 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:54875 - "GET /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52552 - "GET /api/logs?page=1&page_size=50 HTTP/1.1" 403 Forbidden
+INFO:     127.0.0.1:60081 - "OPTIONS /api/transfers HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60081 - "GET /api/transfers HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60081 - "GET /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60081 - "GET /api/transactions?page=1&page_size=50&kho_id=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53805 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53805 - "GET /js/components/charts.js?v=3 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:57909 - "GET /js/pages/settings.js?v=3 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:53805 - "GET /js/auth.js?v=3 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:62632 - "GET /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65070 - "GET /api/logs?page=1&page_size=50 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60546 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60546 - "GET /js/components/charts.js?v=3 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:60546 - "GET /js/pages/settings.js?v=3 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:60546 - "GET /js/pages/transfers.js?v=3 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:60546 - "GET /js/auth.js?v=3 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:60546 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60546 - "GET /js/components/charts.js?v=3 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:54305 - "GET /js/pages/settings.js?v=3 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:62821 - "GET /js/pages/transfers.js?v=3 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:51373 - "GET /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61436 - "GET /api/logs?page=1&page_size=50 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64172 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64172 - "GET /js/utils.js?v=3 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:50476 - "GET /js/components/charts.js?v=3 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:64172 - "GET /js/pages/issues.js?v=3 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:50476 - "GET /js/pages/users.js?v=3 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:64172 - "GET /js/pages/settings.js?v=3 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:50476 - "GET /js/pages/action_logs.js?v=3 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:62548 - "GET /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64427 - "GET /api/logs?page=1&page_size=50 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63968 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63968 - "GET /js/utils.js?v=3 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:63968 - "GET /js/components/table.js?v=3 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:63968 - "GET /js/components/charts.js?v=3 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:63968 - "GET /js/pages/inventory.js?v=3 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:63968 - "GET /js/pages/history.js?v=3 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:63968 - "GET /js/pages/issues.js?v=3 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:63968 - "GET /js/pages/users.js?v=3 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:63968 - "GET /js/pages/settings.js?v=3 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:63968 - "GET /js/pages/transfers.js?v=3 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:63968 - "GET /js/pages/action_logs.js?v=3 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:63968 - "GET /js/auth.js?v=3 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63968 - "GET /js/app.js?v=3 HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:55853 - "OPTIONS /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61601 - "OPTIONS /api/logs?page=1&page_size=50 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55853 - "GET /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61601 - "GET /api/logs?page=1&page_size=50 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65193 - "GET /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56478 - "POST /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56478 - "GET /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56478 - "GET /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56478 - "OPTIONS /api/users/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56478 - "GET /api/users/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56478 - "GET /api/warehouses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63210 - "OPTIONS /api/items?page=1&page_size=50&search=&sort_by=id&sort_dir=asc&kho_id=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63210 - "GET /api/items?page=1&page_size=50&search=&sort_by=id&sort_dir=asc&kho_id=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63210 - "OPTIONS /api/transactions?page=1&page_size=50&kho_id=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63210 - "GET /api/transactions?page=1&page_size=50&kho_id=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63210 - "OPTIONS /api/receipts?page=1&page_size=50&kho_id=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63210 - "GET /api/receipts?page=1&page_size=50&kho_id=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63210 - "OPTIONS /api/items/all?search=&kho_id=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63210 - "GET /api/items/all?search=&kho_id=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63210 - "OPTIONS /api/issues?page=1&page_size=50&kho_id=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63210 - "GET /api/issues?page=1&page_size=50&kho_id=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63210 - "GET /api/items/all?search=&kho_id=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63210 - "OPTIONS /api/categories HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63210 - "GET /api/categories HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63210 - "GET /api/issues?page=1&page_size=50&kho_id=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63210 - "GET /api/receipts?page=1&page_size=50&kho_id=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63210 - "GET /api/issues?page=1&page_size=50&kho_id=2 HTTP/1.1" 200 OK

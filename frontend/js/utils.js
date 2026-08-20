@@ -131,11 +131,7 @@ const utils = {
             nguoiThucHien = parts.join('-').trim();
         }
         
-        // Lấy loại xuất để đánh dấu cấp mới / thay thế
-        const isCapMoi = data.loai_xuat === 'Cấp mới' || data.loai_xuat === 'Cấp Mới';
-        const isThayThe = data.loai_xuat === 'Thay thế' || data.loai_xuat === 'Thay Thế';
-        const capMoiChar = isCapMoi ? '✓' : '';
-        const thayTheChar = isThayThe ? '✓' : '';
+        // Loại xuất sẽ được đọc từ từng transaction (hỗ trợ chế độ "Theo chi tiết")
         
         let headerCapMoi = 'Cấp mới<br>新規提供';
         let headerThayThe = 'Thay thế<br>交換';
@@ -154,8 +150,13 @@ const utils = {
                 const sl = tx.so_luong !== undefined ? utils.formatNumber(tx.so_luong) : '';
                 const tonCuoi = tx.ton_cuoi !== undefined ? utils.formatNumber(tx.ton_cuoi) : '';
                 
-                let valCapMoi = capMoiChar;
-                let valThayThe = thayTheChar;
+                // Xác định loại xuất cho từng dòng: ưu tiên loai_xuat của transaction, fallback về issue
+                const txLoaiXuat = tx.loai_xuat || data.loai_xuat || '';
+                const txIsCapMoi = txLoaiXuat === 'Cấp mới' || txLoaiXuat === 'Cấp Mới';
+                const txIsThayThe = txLoaiXuat === 'Thay thế' || txLoaiXuat === 'Thay Thế';
+                
+                let valCapMoi = txIsCapMoi ? '✓' : '';
+                let valThayThe = txIsThayThe ? '✓' : '';
                 let fontCapMoi = 'font-weight: bold;';
                 let fontThayThe = 'font-weight: bold;';
                 

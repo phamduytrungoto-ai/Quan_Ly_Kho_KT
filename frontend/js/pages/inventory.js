@@ -387,7 +387,7 @@ const InventoryPage = {
                     </div>
                     
                     <input type="file" id="itemImageInput" accept="image/*" style="display: none;">
-                    <button class="btn btn-outline-primary btn-sm w-100" onclick="document.getElementById('itemImageInput').click()">
+                    <button class="btn btn-outline-primary btn-sm w-100" onclick="if(!window.Auth.hasPermission('perm_edit')) { if(window.toast) window.toast.error('Bạn không có quyền sửa sản phẩm ở kho này.'); else alert('Bạn không có quyền sửa sản phẩm ở kho này.'); return; } document.getElementById('itemImageInput').click()">
                         <i class="fas fa-upload"></i> Tải ảnh lên
                     </button>
                     <div id="uploadProgress" class="text-sm text-muted mt-2" style="display:none;">Đang tải lên...</div>
@@ -413,16 +413,40 @@ const InventoryPage = {
                                 <b style="font-size: 1.05rem; color: var(--text-primary);">${item.loai_vat_tu || '---'}</b>
                             </div>
                             <div style="display: flex; flex-direction: column; gap: 4px;">
-                                <span style="font-size: 0.85rem; color: var(--text-muted);"><i class="fas fa-cubes" style="width:16px; text-align:center; margin-right:5px;"></i>Tồn kho hiện tại</span>
-                                <b style="font-size: 1.05rem;" class="${(item.ton_cuoi <= item.dinh_muc && item.dinh_muc > 0) || item.ton_cuoi === 0 ? 'text-danger' : 'text-success'}">${utils.formatNumber(item.ton_cuoi)} ${item.don_vi_tinh}</b>
+                                <span style="font-size: 0.85rem; color: var(--text-muted);"><i class="fas fa-arrow-right" style="width:16px; text-align:center; margin-right:5px;"></i>Tồn đầu</span>
+                                <b style="font-size: 1.05rem; color: var(--text-primary);">${utils.formatNumber(item.ton_dau || 0)} ${item.don_vi_tinh || ''}</b>
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 4px;">
+                                <span style="font-size: 0.85rem; color: var(--text-muted);"><i class="fas fa-tag" style="width:16px; text-align:center; margin-right:5px;"></i>Đơn giá</span>
+                                <b style="font-size: 1.05rem;" class="text-primary">${utils.formatCurrency(item.don_gia || 0)}</b>
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 4px;">
+                                <span style="font-size: 0.85rem; color: var(--text-muted);"><i class="fas fa-arrow-down" style="width:16px; text-align:center; margin-right:5px;"></i>Tổng Nhập</span>
+                                <b style="font-size: 1.05rem; color: var(--success);">${utils.formatNumber(item.tong_nhap || 0)} ${item.don_vi_tinh || ''}</b>
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 4px;">
+                                <span style="font-size: 0.85rem; color: var(--text-muted);"><i class="fas fa-arrow-up" style="width:16px; text-align:center; margin-right:5px;"></i>Tổng Xuất</span>
+                                <b style="font-size: 1.05rem; color: var(--warning);">${utils.formatNumber(item.tong_xuat || 0)} ${item.don_vi_tinh || ''}</b>
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 4px;">
+                                <span style="font-size: 0.85rem; color: var(--text-muted);"><i class="fas fa-cubes" style="width:16px; text-align:center; margin-right:5px;"></i>Tồn cuối hiện tại</span>
+                                <b style="font-size: 1.05rem;" class="${(item.ton_cuoi <= item.dinh_muc && item.dinh_muc > 0) || item.ton_cuoi === 0 ? 'text-danger' : 'text-success'}">${utils.formatNumber(item.ton_cuoi)} ${item.don_vi_tinh || ''}</b>
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 4px;">
+                                <span style="font-size: 0.85rem; color: var(--text-muted);"><i class="fas fa-ruler-horizontal" style="width:16px; text-align:center; margin-right:5px;"></i>Định mức tối thiểu</span>
+                                <b style="font-size: 1.05rem; color: var(--text-primary);">${utils.formatNumber(item.dinh_muc || 0)} ${item.don_vi_tinh || ''}</b>
                             </div>
                             <div style="display: flex; flex-direction: column; gap: 4px;">
                                 <span style="font-size: 0.85rem; color: var(--text-muted);"><i class="fas fa-cogs" style="width:16px; text-align:center; margin-right:5px;"></i>Công đoạn</span>
                                 <b style="font-size: 1.05rem; color: var(--text-primary);">${item.cong_doan || '---'}</b>
                             </div>
+                            <div style="display: flex; flex-direction: column; gap: 4px;">
+                                <span style="font-size: 0.85rem; color: var(--text-muted);"><i class="fas fa-info-circle" style="width:16px; text-align:center; margin-right:5px;"></i>Trạng thái</span>
+                                <b style="font-size: 1.05rem; color: var(--text-primary);">${item.trang_thai || '---'}</b>
+                            </div>
                             <div style="display: flex; flex-direction: column; gap: 4px; grid-column: span 2;">
-                                <span style="font-size: 0.85rem; color: var(--text-muted);"><i class="fas fa-tag" style="width:16px; text-align:center; margin-right:5px;"></i>Đơn giá</span>
-                                <b style="font-size: 1.05rem;" class="text-primary">${utils.formatCurrency(item.don_gia || 0)}</b>
+                                <span style="font-size: 0.85rem; color: var(--text-muted);"><i class="fas fa-clipboard" style="width:16px; text-align:center; margin-right:5px;"></i>Ghi chú</span>
+                                <b style="font-size: 1.05rem; color: var(--text-primary);">${item.ghi_chu || '---'}</b>
                             </div>
                         </div>
                     </div>
@@ -448,6 +472,11 @@ const InventoryPage = {
                     text: '<i class="fas fa-trash"></i> Xóa',
                     class: 'btn-ghost me-auto',
                     onClick: (modal) => {
+                        if (!window.Auth.hasPermission('perm_delete')) {
+                            if (window.toast) window.toast.error("Bạn không có quyền xóa sản phẩm ở kho này.");
+                            else alert("Bạn không có quyền xóa sản phẩm ở kho này.");
+                            return;
+                        }
                         window.modal.hide();
                         window.modal.confirmDelete('Xác nhận xóa', `Bạn có chắc muốn xóa sản phẩm <b>${item.ten_hang}</b> không?`, async () => {
                             try {
@@ -464,6 +493,11 @@ const InventoryPage = {
                     text: '<i class="fas fa-edit"></i> Sửa',
                     class: 'btn-ghost',
                     onClick: (modal) => {
+                        if (!window.Auth.hasPermission('perm_edit')) {
+                            if (window.toast) window.toast.error("Bạn không có quyền sửa sản phẩm ở kho này.");
+                            else alert("Bạn không có quyền sửa sản phẩm ở kho này.");
+                            return;
+                        }
                         window.modal.hide();
                         this.showEditItemForm(item);
                     }
@@ -473,6 +507,11 @@ const InventoryPage = {
                     text: '<i class="fas fa-save"></i> Lưu Thông Số',
                     class: 'btn-ghost',
                     onClick: async (modal) => {
+                        if (!window.Auth.hasPermission('perm_edit')) {
+                            if (window.toast) window.toast.error("Bạn không có quyền sửa sản phẩm ở kho này.");
+                            else alert("Bạn không có quyền sửa sản phẩm ở kho này.");
+                            return;
+                        }
                         try {
                             const newSpecs = document.getElementById('itemSpecs').value.trim();
                             // Update the item via API
@@ -497,6 +536,12 @@ const InventoryPage = {
             const fileInput = document.getElementById('itemImageInput');
             if (fileInput) {
                 fileInput.addEventListener('change', async (e) => {
+                    if (!window.Auth.hasPermission('perm_edit')) {
+                        if (window.toast) window.toast.error("Bạn không có quyền sửa sản phẩm ở kho này.");
+                        else alert("Bạn không có quyền sửa sản phẩm ở kho này.");
+                        e.target.value = '';
+                        return;
+                    }
                     if (!e.target.files || e.target.files.length === 0) return;
                     const file = e.target.files[0];
 

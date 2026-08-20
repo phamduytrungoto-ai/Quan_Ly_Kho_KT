@@ -94,15 +94,14 @@ const TransfersPage = {
         
         // Determine allowed IDs for "Từ kho"
         const isAdmin = window.Auth.user.is_admin;
-        const allowedStr = window.Auth.user.allowed_kho_ids || '';
-        const isAll = allowedStr === '*';
-        const allowedIds = isAll ? [] : allowedStr.split(',').map(x => parseInt(x.trim()));
+        const perms = window.Auth.user.permissions || [];
+        const allowedIds = perms.filter(p => p.perm_view).map(p => p.warehouse_id);
 
         warehouses.forEach(w => {
             const html = `<option value="${w.id}">${utils.escapeHtml(w.ten_kho)}</option>`;
             allOptionsHtml += html;
             
-            if (isAdmin || isAll || allowedIds.includes(w.id)) {
+            if (isAdmin || allowedIds.includes(w.id)) {
                 allowedOptionsHtml += html;
             }
         });

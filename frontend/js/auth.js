@@ -27,7 +27,22 @@ const Auth = {
         sessionStorage.setItem('wms_user', JSON.stringify(user));
     },
 
-    logout() {
+    async logout() {
+        if (this.token) {
+            try {
+                // Ensure API_BASE_URL is defined (from api.js) or fallback to '/api'
+                const baseUrl = typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : '/api';
+                await fetch(baseUrl + '/auth/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + this.token
+                    }
+                });
+            } catch (e) {
+                console.error('Logout error', e);
+            }
+        }
+        
         this.token = null;
         this.user = null;
         sessionStorage.removeItem('wms_token');
@@ -39,9 +54,17 @@ const Auth = {
         return !!this.token && !!this.user;
     },
 
-    hasPermission(permName) {
+    hasPermission(permName, khoId = null) {
         if (!this.user) return false;
         if (this.user.is_admin) return true;
+        
+        if (this.user.permissions && this.user.permissions.length > 0) {
+            const targetKhoId = parseInt(khoId || localStorage.getItem('active_kho_id') || 1);
+            const perm = this.user.permissions.find(p => p.warehouse_id === targetKhoId);
+            if (perm) return !!perm[permName];
+            return false;
+        }
+        
         return !!this.user[permName];
     },
 

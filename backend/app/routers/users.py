@@ -1,4 +1,4 @@
-﻿from typing import List
+from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from .. import models, schemas, auth_utils, database, deps
@@ -17,12 +17,21 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(database.get_db)
     
     hashed_password = auth_utils.get_password_hash(user.password)
     user_dict = user.model_dump()
+    permissions_data = user_dict.pop("permissions", None)
     del user_dict["password"]
     
     db_user = models.User(**user_dict, hashed_password=hashed_password)
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
+    
+    if permissions_data is not None:
+        for perm in permissions_data:
+            new_perm = models.UserWarehousePermission(user_id=db_user.id, **perm)
+            db.add(new_perm)
+        db.commit()
+        db.refresh(db_user)
+        
     return db_user
 
 @router.put("/{user_id}", response_model=schemas.UserResponse)
@@ -32,12 +41,22 @@ def update_user(user_id: int, user: schemas.UserUpdate, db: Session = Depends(da
         raise HTTPException(status_code=404, detail="User not found")
         
     update_data = user.model_dump(exclude_unset=True)
+    permissions_data = update_data.pop("permissions", None)
+    
     if "password" in update_data:
         update_data["hashed_password"] = auth_utils.get_password_hash(update_data.pop("password"))
         
     for key, value in update_data.items():
         setattr(db_user, key, value)
         
+    if permissions_data is not None:
+        # Delete old permissions
+        db.query(models.UserWarehousePermission).filter(models.UserWarehousePermission.user_id == db_user.id).delete()
+        # Add new permissions
+        for perm in permissions_data:
+            new_perm = models.UserWarehousePermission(user_id=db_user.id, **perm)
+            db.add(new_perm)
+            
     db.commit()
     db.refresh(db_user)
     return db_user

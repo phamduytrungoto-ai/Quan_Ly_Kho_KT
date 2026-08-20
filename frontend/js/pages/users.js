@@ -71,10 +71,16 @@ const UsersPage = {
             let perms = [];
             if (u.is_admin) {
                 perms.push('<span class="badge" style="background:var(--accent-blue);color:#fff">Toàn quyền (Admin)</span>');
-            } else {
-                for (const [key, name] of Object.entries(permissionNames)) {
-                    if (u[key]) perms.push(`<span class="badge" style="background:var(--accent-blue-glow);color:var(--accent-blue)">${name}</span>`);
-                }
+            } else if (u.permissions && u.permissions.length > 0) {
+                u.permissions.forEach(p => {
+                    let whPerms = [];
+                    for (const [key, name] of Object.entries(permissionNames)) {
+                        if (p[key]) whPerms.push(name);
+                    }
+                    if (whPerms.length > 0) {
+                        perms.push(`<span class="badge" style="background:var(--accent-blue-glow);color:var(--accent-blue);margin-bottom:2px">Kho ID ${p.warehouse_id}: ${whPerms.join(', ')}</span><br>`);
+                    }
+                });
             }
 
             return `
@@ -109,18 +115,45 @@ const UsersPage = {
         });
     },
 
-    showModal(userId = null) {
+    async showModal(userId = null) {
         const user = userId ? this.users.find(u => u.id === userId) : null;
         
+        let warehouses = [];
+        try {
+            warehouses = await api.fetchJSON('/warehouses');
+        } catch(e) {
+            console.error("Lỗi tải kho", e);
+        }
+        
         const perms = [
-            { id: 'perm_view', label: 'Quyền Xem' },
-            { id: 'perm_add', label: 'Quyền Thêm' },
-            { id: 'perm_edit', label: 'Quyền Sửa' },
-            { id: 'perm_delete', label: 'Quyền Xóa' },
-            { id: 'perm_approve', label: 'Quyền Duyệt' },
-            { id: 'perm_print', label: 'Quyền In' },
-            { id: 'perm_excel', label: 'Quyền Xuất Excel' }
+            { id: 'perm_view', label: 'Xem' },
+            { id: 'perm_add', label: 'Thêm' },
+            { id: 'perm_edit', label: 'Sửa' },
+            { id: 'perm_delete', label: 'Xóa' },
+            { id: 'perm_approve', label: 'Duyệt' },
+            { id: 'perm_print', label: 'In' },
+            { id: 'perm_excel', label: 'Xuất Excel' }
         ];
+
+        let warehouseRows = '';
+        if (warehouses && warehouses.length > 0) {
+            warehouses.forEach(wh => {
+                let userPerm = user && user.permissions ? user.permissions.find(p => p.warehouse_id === wh.id) : null;
+                
+                let checksHtml = perms.map(p => `
+                    <td class="text-center" style="vertical-align: middle;">
+                        <input type="checkbox" class="perm-checkbox" data-kho="${wh.id}" data-perm="${p.id}" ${(!user && p.id === 'perm_view') || (userPerm && userPerm[p.id]) ? 'checked' : ''}>
+                    </td>
+                `).join('');
+                
+                warehouseRows += `
+                    <tr>
+                        <td><strong>${wh.ma_kho}</strong><br><small>${wh.ten_kho}</small></td>
+                        ${checksHtml}
+                    </tr>
+                `;
+            });
+        }
 
         const formHtml = `
             <form id="userForm">
@@ -154,19 +187,20 @@ const UsersPage = {
                     </label>
                 </div>
                 <div class="form-group mb-3" id="permissionsGroup">
-                    <label style="margin-bottom:10px;display:block"><strong>Ma trận Phân quyền:</strong></label>
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; background:var(--bg-input); padding:15px; border-radius:8px; border:1px solid var(--border-color)">
-                        ${perms.map(p => `
-                            <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
-                                <input type="checkbox" id="${p.id}" ${(!user && p.id === 'perm_view') || (user && user[p.id]) ? 'checked' : ''}>
-                                ${p.label}
-                            </label>
-                        `).join('')}
+                    <label style="margin-bottom:10px;display:block"><strong>Ma trận Phân quyền theo Kho:</strong></label>
+                    <div style="overflow-x: auto; background: var(--bg-input); padding: 10px; border-radius: 8px; border: 1px solid var(--border-color);">
+                        <table class="data-table" style="margin: 0;">
+                            <thead>
+                                <tr>
+                                    <th>Kho</th>
+                                    ${perms.map(p => `<th class="text-center" style="width: 60px;">${p.label}</th>`).join('')}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${warehouseRows}
+                            </tbody>
+                        </table>
                     </div>
-                </div>
-                <div class="form-group mb-3">
-                    <label>Danh sách ID Kho được truy cập (BẮT BUỘC NHẬP BẰNG SỐ CÁCH NHAU DẤU PHẨY, ví dụ: 1, 2. Hoặc nhập * để cho phép tất cả)</label>
-                    <input type="text" class="form-control" id="u_allowed_kho_ids" value="${user?.allowed_kho_ids || '*'}">
                 </div>
                 <div class="form-group mt-3">
                     <label style="display:flex;align-items:center;gap:8px;">
@@ -179,7 +213,7 @@ const UsersPage = {
         window.modal.show({
             title: user ? 'Sửa Tài Khoản & Phân Quyền' : 'Thêm Tài Khoản',
             content: formHtml,
-            width: '600px',
+            width: '1000px',
             buttons: [
                 { text: 'Hủy', class: 'btn-ghost text-muted', close: true },
                 { text: 'Lưu lại', class: 'btn-primary', onClick: () => this.handleSave() }
@@ -202,28 +236,27 @@ const UsersPage = {
         if (!form.reportValidity()) return false;
 
         const id = document.querySelector('#userId').value;
+        const permissionsMap = {};
+        document.querySelectorAll('.perm-checkbox').forEach(cb => {
+            const khoId = parseInt(cb.dataset.kho);
+            const permId = cb.dataset.perm;
+            if (!permissionsMap[khoId]) permissionsMap[khoId] = { warehouse_id: khoId };
+            permissionsMap[khoId][permId] = cb.checked;
+        });
+
+        const permissionsList = Object.values(permissionsMap).filter(p => 
+            p.perm_view || p.perm_add || p.perm_edit || p.perm_delete || p.perm_approve || p.perm_print || p.perm_excel
+        );
+
         const data = {
             username: document.querySelector('#u_username').value,
             email: document.querySelector('#u_email').value,
             full_name: document.querySelector('#u_fullname').value,
             role: document.querySelector('#u_role').value,
             is_admin: document.querySelector('#u_is_admin').checked,
-            perm_view: document.querySelector('#perm_view').checked,
-            perm_add: document.querySelector('#perm_add').checked,
-            perm_edit: document.querySelector('#perm_edit').checked,
-            perm_delete: document.querySelector('#perm_delete').checked,
-            perm_approve: document.querySelector('#perm_approve').checked,
-            perm_print: document.querySelector('#perm_print').checked,
-            perm_excel: document.querySelector('#perm_excel').checked,
-            perm_excel: document.querySelector('#perm_excel').checked,
             is_active: document.querySelector('#u_is_active').checked,
-            allowed_kho_ids: document.querySelector('#u_allowed_kho_ids').value.trim()
+            permissions: permissionsList
         };
-
-        if (data.allowed_kho_ids !== '*' && !/^[\d\s,]+$/.test(data.allowed_kho_ids)) {
-            window.toast.error('Danh sách ID kho không hợp lệ. Vui lòng chỉ nhập số và dấu phẩy, ví dụ: 1, 2');
-            return false;
-        }
 
         const pass = document.querySelector('#u_password').value;
         if (pass) data.password = pass;

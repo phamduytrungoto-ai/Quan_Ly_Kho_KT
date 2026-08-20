@@ -4,7 +4,9 @@ from sqlalchemy import or_, func, desc
 from typing import Optional
 from datetime import date
 
-from ..deps import require_permission, apply_warehouse_filter, check_warehouse_access
+from .. import deps
+from ..deps import apply_warehouse_filter, check_warehouse_access, check_warehouse_permission
+from ..logger import log_action
 from ..database import get_db
 from ..models import Item, Transaction, Issue, TransactionType
 from ..schemas import IssueCreate, IssueResponse, IssueListResponse
@@ -32,10 +34,10 @@ def list_issues(
     to_date: Optional[date] = None,
     kho_id: Optional[int] = None,
     db: Session = Depends(get_db),
-    current_user = Depends(require_permission("perm_view"))
+    current_user = Depends(deps.get_current_user)
 ):
     query = db.query(Issue)
-    query = apply_warehouse_filter(query, Issue, current_user, kho_id)
+    query = apply_warehouse_filter(query, Issue, current_user, db, kho_id)
     
     if search:
         search_lower = search.lower()
@@ -65,10 +67,10 @@ def list_issues(
     }
 
 @router.post("", response_model=IssueResponse)
-def create_issue(issue: IssueCreate, db: Session = Depends(get_db), current_user = Depends(require_permission("perm_add"))):
+def create_issue(issue: IssueCreate, db: Session = Depends(get_db), current_user = Depends(deps.get_current_user)):
     if not issue.items:
         raise HTTPException(status_code=400, detail="Phiếu xuất phải có ít nhất 1 mặt hàng")
-    check_warehouse_access(current_user, issue.kho_id)
+    check_warehouse_permission(current_user, issue.kho_id, "perm_add", db)
         
     ma_phieu = generate_issue_code(db)
     
@@ -119,15 +121,16 @@ def create_issue(issue: IssueCreate, db: Session = Depends(get_db), current_user
         
     db.commit()
     db.refresh(new_issue)
+    log_action(db, None, current_user, "Tạo phiếu xuất", f"Mã phiếu: {ma_phieu}, Kho ID: {issue.kho_id}")
     return new_issue
 
 @router.get("/{id}")
-def get_issue(id: int, db: Session = Depends(get_db), current_user = Depends(require_permission("perm_view"))):
+def get_issue(id: int, db: Session = Depends(get_db), current_user = Depends(deps.get_current_user)):
     issue = db.query(Issue).filter(Issue.id == id).first()
     if not issue:
         raise HTTPException(status_code=404, detail="Không tìm thấy phiếu xuất")
         
-    check_warehouse_access(current_user, issue.kho_id)
+    check_warehouse_permission(current_user, issue.kho_id, "perm_view", db)
     
     return {
         "id": issue.id,
@@ -146,6 +149,8 @@ def get_issue(id: int, db: Session = Depends(get_db), current_user = Depends(req
                 "so_luong": tx.so_luong,
                 "don_vi_tinh": tx.don_vi_tinh,
                 "cong_doan": tx.cong_doan,
+                "loai_xuat": tx.loai_xuat,
+                "nguoi_nhan": tx.nguoi_nhan,
                 "ghi_chu": tx.ghi_chu,
                 "ton_cuoi": tx.item.ton_cuoi if tx.item else 0,
                 "dinh_muc": tx.item.dinh_muc if tx.item else 0
@@ -154,7 +159,7 @@ def get_issue(id: int, db: Session = Depends(get_db), current_user = Depends(req
     }
 
 @router.get("/{id}/export-excel")
-def export_issue_excel(id: int, db: Session = Depends(get_db), current_user = Depends(require_permission("perm_view"))):
+def export_issue_excel(id: int, db: Session = Depends(get_db), current_user = Depends(deps.get_current_user)):
     from fastapi.responses import StreamingResponse
     from app.excel_utils import generate_receipt_excel
     import urllib.parse
@@ -177,10 +182,11 @@ def export_issue_excel(id: int, db: Session = Depends(get_db), current_user = De
     )
 
 @router.delete("/{id}")
-def delete_issue(id: int, db: Session = Depends(get_db), _=Depends(require_permission("perm_delete"))):
+def delete_issue(id: int, db: Session = Depends(get_db), current_user = Depends(deps.get_current_user)):
     issue = db.query(Issue).filter(Issue.id == id).first()
     if not issue:
         raise HTTPException(status_code=404, detail="Không tìm thấy phiếu xuất")
+    check_warehouse_permission(current_user, issue.kho_id, "perm_delete", db)
         
     for trans in issue.transactions:
         item = db.query(Item).filter(Item.id == trans.item_id).first()
@@ -190,4 +196,5 @@ def delete_issue(id: int, db: Session = Depends(get_db), _=Depends(require_permi
             
     db.delete(issue)
     db.commit()
-    return {"detail": "Đã xóa phiếu xuất và hoàn lại tồn kho"}
+    log_action(db, None, current_user, "Xóa phiếu xuất", f"Mã phiếu: {issue.ma_phieu}")
+    return {"detail": "Đã xóa phiếu xuất và cập nhật tồn kho"}
