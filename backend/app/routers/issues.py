@@ -9,7 +9,7 @@ from ..deps import apply_warehouse_filter, check_warehouse_access, check_warehou
 from ..logger import log_action
 from ..database import get_db
 from ..models import Item, Transaction, Issue, TransactionType
-from ..schemas import IssueCreate, IssueResponse, IssueListResponse
+from ..schemas import IssueCreate, IssueUpdate, IssueResponse, IssueListResponse
 
 router = APIRouter(prefix="/api/issues", tags=["issues"])
 
@@ -144,6 +144,7 @@ def get_issue(id: int, db: Session = Depends(get_db), current_user = Depends(dep
         "ma_kho": issue.warehouse.ma_kho if issue.warehouse else "DP-EE",
         "transactions": [
             {
+                "item_id": tx.item_id,
                 "ma_so": tx.ma_so,
                 "ten_hang": tx.ten_hang,
                 "so_luong": tx.so_luong,
@@ -180,6 +181,110 @@ def export_issue_excel(id: int, db: Session = Depends(get_db), current_user = De
             "Content-Disposition": f"attachment; filename*=UTF-8''{encoded_filename}"
         }
     )
+
+@router.put("/{id}", response_model=IssueResponse)
+def update_issue(id: int, issue: IssueUpdate, db: Session = Depends(get_db), current_user = Depends(deps.get_current_user)):
+    check_warehouse_permission(current_user, issue.kho_id, "perm_edit", db)
+    
+    old_issue = db.query(Issue).filter(Issue.id == id).first()
+    if not old_issue:
+        raise HTTPException(status_code=404, detail="Không tìm thấy phiếu xuất")
+        
+    if old_issue.kho_id != issue.kho_id:
+        raise HTTPException(status_code=400, detail="Không được thay đổi kho của phiếu")
+
+    # 1. Rollback old transactions (Return stock)
+    for trans in old_issue.transactions:
+        item = db.query(Item).filter(Item.id == trans.item_id, Item.kho_id == old_issue.kho_id).first()
+        if item:
+            item.tong_xuat -= trans.so_luong
+            item.ton_cuoi += trans.so_luong
+    
+    # Calculate changes for logging
+    changes = []
+    if old_issue.ngay_xuat != issue.ngay_xuat:
+        changes.append(f"Ngày: {old_issue.ngay_xuat}->{issue.ngay_xuat}")
+    if (old_issue.nguoi_yeu_cau or '') != (issue.nguoi_yeu_cau or ''):
+        changes.append(f"Ng.yêu cầu: '{old_issue.nguoi_yeu_cau}'->'{issue.nguoi_yeu_cau}'")
+    if (old_issue.nguoi_xuat or '') != (issue.nguoi_xuat or ''):
+        changes.append(f"Ng.xuất: '{old_issue.nguoi_xuat}'->'{issue.nguoi_xuat}'")
+    if (old_issue.loai_xuat or '') != (issue.loai_xuat or ''):
+        changes.append(f"L.xuất: '{old_issue.loai_xuat}'->'{issue.loai_xuat}'")
+    if (old_issue.ghi_chu or '') != (issue.ghi_chu or ''):
+        changes.append(f"Ghi chú: '{old_issue.ghi_chu}'->'{issue.ghi_chu}'")
+
+    old_items_dict = {t.item_id: t for t in old_issue.transactions}
+    new_items_dict = {req.item_id: req for req in issue.items}
+
+    for item_id, old_t in old_items_dict.items():
+        if item_id not in new_items_dict:
+            changes.append(f"Xóa VT {old_t.ma_so}")
+
+    # 2. Delete old transactions
+    db.query(Transaction).filter(Transaction.issue_id == id).delete()
+
+    # 3. Update header
+    old_issue.ngay_xuat = issue.ngay_xuat
+    old_issue.nguoi_yeu_cau = issue.nguoi_yeu_cau
+    old_issue.nguoi_xuat = issue.nguoi_xuat
+    old_issue.loai_xuat = issue.loai_xuat
+    old_issue.ghi_chu = issue.ghi_chu
+    
+    # 4. Check new stock availability and apply new transactions
+    for req_item in issue.items:
+        item = db.query(Item).filter(Item.id == req_item.item_id, Item.kho_id == issue.kho_id).first()
+        if not item:
+            raise HTTPException(status_code=404, detail=f"Không tìm thấy vật tư ID {req_item.item_id}")
+            
+        if item.ton_cuoi < req_item.so_luong:
+            raise HTTPException(status_code=400, detail=f"Vật tư {item.ma_so} không đủ tồn kho (chỉ còn {item.ton_cuoi})")
+            
+        # Log item changes
+        if req_item.item_id not in old_items_dict:
+            changes.append(f"Thêm VT {item.ma_so} (SL: {req_item.so_luong})")
+        else:
+            old_t = old_items_dict[req_item.item_id]
+            item_changes = []
+            if old_t.so_luong != req_item.so_luong:
+                item_changes.append(f"SL {old_t.so_luong}->{req_item.so_luong}")
+            if (old_t.cong_doan or '') != (req_item.cong_doan or ''):
+                item_changes.append(f"C.Đoạn '{old_t.cong_doan}'->'{req_item.cong_doan}'")
+            if (old_t.loai_xuat or '') != (req_item.loai_xuat or ''):
+                item_changes.append(f"L.xuất '{old_t.loai_xuat}'->'{req_item.loai_xuat}'")
+            if item_changes:
+                changes.append(f"VT {item.ma_so}: " + ", ".join(item_changes))
+
+        trans = Transaction(
+            loai=TransactionType.EXPORT,
+            item_id=item.id,
+            issue_id=old_issue.id,
+            ngay=issue.ngay_xuat,
+            ma_quan_ly=item.ma_quan_ly,
+            ten_hang=item.ten_hang,
+            ma_so=item.ma_so,
+            so_luong=req_item.so_luong,
+            don_vi_tinh=item.don_vi_tinh,
+            cong_doan=req_item.cong_doan,
+            nguoi_xuat=issue.nguoi_xuat,
+            nguoi_yeu_cau=issue.nguoi_yeu_cau,
+            nguoi_nhan=req_item.nguoi_nhan,
+            loai_xuat=req_item.loai_xuat or issue.loai_xuat,
+            trang_thai="Có kiểm kê",
+            ghi_chu=req_item.ghi_chu,
+            kho_id=issue.kho_id
+        )
+        db.add(trans)
+        
+        # update item
+        item.tong_xuat += req_item.so_luong
+        item.ton_cuoi -= req_item.so_luong
+        
+    db.commit()
+    db.refresh(old_issue)
+    
+    change_detail = "; ".join(changes) if changes else "Không thay đổi"
+    log_action(db, None, current_user, "Sửa phiếu xuất", f"Mã phiếu: {old_issue.ma_phieu}. {change_detail}")
+    return old_issue
 
 @router.delete("/{id}")
 def delete_issue(id: int, db: Session = Depends(get_db), current_user = Depends(deps.get_current_user)):

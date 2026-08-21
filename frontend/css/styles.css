@@ -1117,6 +1117,35 @@ textarea.form-control {
     gap: 12px;
 }
 
+/* ---- Modal Form Label / Input color distinction ---- */
+/* Tiêu đề (label) trong form modal: màu xanh nhạt, đậm hơn */
+.modal-body label,
+.modal-body .modal-label {
+    color: #7eb3f0 !important;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+/* Nội dung input/select trong modal: màu trắng sáng */
+.modal-body input,
+.modal-body select,
+.modal-body textarea {
+    color: #e8edf5 !important;
+}
+
+[data-theme="light"] .modal-body label,
+[data-theme="light"] .modal-body .modal-label {
+    color: #2563eb !important;
+}
+
+[data-theme="light"] .modal-body input,
+[data-theme="light"] .modal-body select,
+[data-theme="light"] .modal-body textarea {
+    color: #1e293b !important;
+}
+
 /* ============================================================
    TOAST NOTIFICATIONS
    ============================================================ */
@@ -1652,17 +1681,28 @@ body.no-perm-view .nav-item:not([data-page="dashboard"]) {
     border: none;
     color: #64748b;
     cursor: pointer;
-    padding: 4px 8px;
+    padding: 6px;
     border-radius: 6px;
-    transition: all 0.2s;
+    transition: color 0.2s;
     display: flex;
     align-items: center;
     justify-content: center;
+    z-index: 100;
+    outline: none;
 }
 
 .btn-toggle-pass:hover {
-    color: #cbd5e1;
-    background: rgba(255, 255, 255, 0.1);
+    color: #94a3b8;
+}
+
+/* Ẩn con mắt mặc định của Edge/Chrome/Firefox */
+#loginPassword::-ms-reveal,
+#loginPassword::-ms-clear {
+    display: none !important;
+}
+
+.input-field input#loginPassword {
+    padding-right: 46px !important;
 }
 
 /* Login Button */
@@ -1854,14 +1894,7 @@ html:not([data-theme="light"]) .theme-toggle .fa-sun { display: inline-block; }
     color: #94a3b8;
 }
 
-[data-theme="light"] .btn-toggle-pass {
-    color: #94a3b8;
-}
 
-[data-theme="light"] .btn-toggle-pass:hover {
-    color: #475569;
-    background: rgba(0, 0, 0, 0.05);
-}
 
 [data-theme="light"] .login-footer {
     color: #94a3b8;
@@ -1994,4 +2027,30 @@ html:not([data-theme="light"]) .theme-toggle .fa-sun { display: inline-block; }
 @keyframes fadeInUp {
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
+}
+
+/* Fix item name truncation in autocomplete */
+.autocomplete-item,
+.autocomplete-dropdown li,
+.autocomplete-item .item-name,
+.autocomplete-dropdown li .font-weight-bold {
+    white-space: normal !important;
+    word-break: break-word !important;
+    line-height: 1.4 !important;
+}
+
+/* Modal Maximize Styles */
+.modal.maximized {
+    width: 100% !important;
+    max-width: 100vw !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    display: flex;
+    flex-direction: column;
+}
+.modal.maximized .modal-body {
+    flex: 1;
+    overflow-y: auto;
 }

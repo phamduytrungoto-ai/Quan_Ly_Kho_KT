@@ -228,6 +228,7 @@ const api = {
             data.kho_id = parseInt(api.getKhoId());
             return api.fetchJSON('/receipts', { method: 'POST', body: JSON.stringify(data) });
         },
+        update: (id, data) => api.fetchJSON(`/receipts/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
         delete: (id) => api.fetchJSON(`/receipts/${id}`, { method: 'DELETE' })
     },
 
@@ -244,7 +245,20 @@ const api = {
             data.kho_id = parseInt(api.getKhoId());
             return api.fetchJSON('/issues', { method: 'POST', body: JSON.stringify(data) });
         },
+        update: (id, data) => api.fetchJSON(`/issues/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
         delete: (id) => api.fetchJSON(`/issues/${id}`, { method: 'DELETE' })
+    },
+    
+    // Phiếu chuyển kho (Transfers)
+    transfers: {
+        list: (params) => {
+            const query = new URLSearchParams(params || {}).toString();
+            return api.fetchJSON(`/transfers?${query}`);
+        },
+        get: (id) => api.fetchJSON(`/transfers/${id}`),
+        create: (data) => api.fetchJSON('/transfers', { method: 'POST', body: JSON.stringify(data) }),
+        update: (id, data) => api.fetchJSON(`/transfers/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+        delete: (id) => api.fetchJSON(`/transfers/${id}`, { method: 'DELETE' })
     },
     
     // Quản lý người dùng

@@ -259,7 +259,7 @@ const IssuesPage = {
     },
 
     updateItemsTable() {
-        const tbody = document.querySelector('#itemsTable tbody');
+        const tbody = document.querySelector('#page-issues #itemsTable tbody');
         const submitBtn = document.querySelector('#page-issues #btnSubmitIssue');
         
         if (this.currentItems.length === 0) {
@@ -384,13 +384,29 @@ const IssuesPage = {
                 else alert("Bạn không có quyền thực hiện thao tác này.");
                 return;
             }
-            formCard.style.display = 'block';
-            btnToggleForm.style.display = 'none';
+            if (formCard.style.display === 'none') {
+                formCard.style.display = 'block';
+                btnToggleForm.innerHTML = '<i class="fas fa-minus"></i> Thu gọn form';
+            } else {
+                formCard.style.display = 'none';
+                btnToggleForm.innerHTML = '<i class="fas fa-plus"></i> Tạo phiếu xuất';
+                
+                // Reset edit mode if closing
+                if (this.editingIssueId) {
+                    this.editingIssueId = null;
+                    document.querySelector('#page-issues #issueForm').reset();
+                    document.querySelector('#page-issues #ngay_xuat').value = utils.getTodayYYYYMMDD();
+                    document.querySelector('#page-issues #nguoi_xuat').value = window.Auth ? window.Auth.user.full_name : '';
+                    document.querySelector('#page-issues #btnSubmitIssue').innerHTML = '<i class="fas fa-save"></i> Xác nhận xuất kho';
+                    document.querySelector('#page-issues #issueFormCard .card-title').innerHTML = '<i class="fas fa-file-export"></i> Lập Phiếu Xuất Kho';
+                    this.currentItems = [];
+                    this.updateItemsTable();
+                }
+            }
         });
 
         btnCloseForm.addEventListener('click', () => {
-            formCard.style.display = 'none';
-            btnToggleForm.style.display = 'inline-block';
+            btnToggleForm.click();
         });
 
         // Autocomplete
@@ -615,16 +631,27 @@ const IssuesPage = {
             utils.setLoading(submitBtn, true);
 
             try {
-                await api.issues.create(data);
-                window.toast.success('Đã lưu phiếu xuất kho thành công');
+                if (this.editingIssueId) {
+                    await api.issues.update(this.editingIssueId, data);
+                    window.toast.success('Đã cập nhật phiếu xuất kho thành công');
+                } else {
+                    await api.issues.create(data);
+                    window.toast.success('Đã lưu phiếu xuất kho thành công');
+                }
                 
                 // Reset form
+                this.editingIssueId = null;
+                submitBtn.innerHTML = '<i class="fas fa-save"></i> Xác nhận xuất kho';
+                document.querySelector('#page-issues #issueFormCard .card-title').innerHTML = '<i class="fas fa-file-export"></i> Lập Phiếu Xuất Kho';
                 document.querySelector('#page-issues #issueForm').reset();
                 document.querySelector('#page-issues #ngay_xuat').value = utils.getTodayYYYYMMDD();
+                document.querySelector('#page-issues #nguoi_xuat').value = window.Auth ? window.Auth.user.full_name : '';
                 this.currentItems = [];
                 this.updateItemsTable();
                 
-                btnCloseForm.click();
+                if (formCard && formCard.style.display !== 'none') {
+                    btnToggleForm.click();
+                }
                 this.loadData();
                 this.loadAutocompleteData(); // Refresh stock data
             } catch (error) {
@@ -716,6 +743,36 @@ const IssuesPage = {
                 ${utils.generatePrintTemplate('issue', issue)}
             `;
             
+            const buttons = [];
+            if (window.Auth && window.Auth.hasPermission('perm_edit')) {
+                buttons.push({
+                    html: '<i class="fas fa-edit"></i> Sửa',
+                    className: 'btn btn-ghost btn-sm text-warning',
+                    onClick: (win) => {
+                        win.remove();
+                        IssuesPage.editIssue(issue);
+                    }
+                });
+            }
+            if (window.Auth && window.Auth.hasPermission('perm_delete')) {
+                buttons.push({
+                    html: '<i class="fas fa-trash"></i> Xóa',
+                    className: 'btn btn-ghost btn-sm text-danger',
+                    onClick: async (win) => {
+                        if (confirm('Bạn có chắc chắn muốn xóa phiếu này? Số lượng tồn kho sẽ được tính toán lại.')) {
+                            try {
+                                await api.issues.delete(id);
+                                window.toast.success('Xóa phiếu thành công');
+                                win.remove();
+                                IssuesPage.loadData();
+                            } catch (error) {
+                                window.toast.error(error.message);
+                            }
+                        }
+                    }
+                });
+            }
+
             window.floatingWindow.show({
                 id: 'issue-' + id,
                 title: 'Chi Tiết Phiếu Xuất Kho - ' + issue.ma_phieu,
@@ -723,11 +780,55 @@ const IssuesPage = {
                 width: '1400px',
                 height: '800px',
                 print: true,
-                exportExcelUrl: `${API_BASE_URL}/issues/${id}/export-excel`
+                exportExcelUrl: `${API_BASE_URL}/issues/${id}/export-excel`,
+                buttons: buttons
             });
         } catch (error) {
             window.toast.error('Không thể tải chi tiết phiếu xuất');
         }
+    },
+    
+    editIssue(issue) {
+        this.editingIssueId = issue.id;
+        
+        // Open form if closed
+        const formCard = document.querySelector('#page-issues #issueFormCard');
+        const btnToggleForm = document.querySelector('#page-issues #btnToggleForm');
+        if (formCard.style.display === 'none') {
+            btnToggleForm.click();
+        }
+        
+        // Populate header
+        document.querySelector('#page-issues #issueFormCard .card-title').innerHTML = `<i class="fas fa-edit"></i> Sửa Phiếu Xuất: ${issue.ma_phieu}`;
+        document.querySelector('#page-issues #ngay_xuat').value = issue.ngay_xuat;
+        document.querySelector('#page-issues #nguoi_yeu_cau').value = issue.nguoi_yeu_cau || '';
+        document.querySelector('#page-issues #nguoi_xuat').value = issue.nguoi_xuat || '';
+        document.querySelector('#page-issues #ghi_chu').value = issue.ghi_chu || '';
+        
+        const nguoiNhanPhieu = issue.transactions.length > 0 ? issue.transactions[0].nguoi_nhan : '';
+        document.querySelector('#page-issues #nguoi_nhan_phieu').value = nguoiNhanPhieu || '';
+        
+        // Populate items
+        this.currentItems = issue.transactions.map(tx => ({
+            item_id: tx.item_id,
+            ma_so: tx.ma_so,
+            ten_hang: tx.ten_hang,
+            so_luong: tx.so_luong,
+            don_vi_tinh: tx.don_vi_tinh,
+            ton_cuoi: tx.ton_cuoi || 0,
+            cong_doan: tx.cong_doan || '',
+            loai_xuat: tx.loai_xuat || 'Cấp mới'
+        }));
+        
+        this.updateItemsTable();
+        
+        // Update button
+        const submitBtn = document.querySelector('#page-issues #btnSubmitIssue');
+        submitBtn.innerHTML = '<i class="fas fa-save"></i> Cập nhật phiếu';
+        submitBtn.disabled = false;
+        
+        // Scroll to form
+        formCard.scrollIntoView({ behavior: 'smooth' });
     },
     
     renderIssueDropdown(issues) {

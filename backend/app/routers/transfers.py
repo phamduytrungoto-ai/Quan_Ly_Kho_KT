@@ -6,7 +6,7 @@ from sqlalchemy import desc
 
 from ..database import get_db
 from ..models import Transfer, Transaction, Item, TransactionType
-from ..schemas import TransferCreate, TransferResponse
+from ..schemas import TransferCreate, TransferUpdate, TransferResponse
 from ..deps import check_warehouse_permission, get_allowed_warehouse_ids
 from .. import deps
 from ..logger import log_action
@@ -108,7 +108,7 @@ def create_transfer(data: TransferCreate, db: Session = Depends(get_db), current
                 ma_so=src_item.ma_so,
                 nha_cung_cap=src_item.nha_cung_cap,
                 don_gia=src_item.don_gia,
-                vi_tri="",
+                vi_tri=item_req.vi_tri_moi or "",
                 don_vi_tinh=src_item.don_vi_tinh,
                 dinh_muc=src_item.dinh_muc,
                 trang_thai=src_item.trang_thai,
@@ -124,6 +124,8 @@ def create_transfer(data: TransferCreate, db: Session = Depends(get_db), current
             )
             db.add(dst_item)
             db.flush()
+        elif item_req.vi_tri_moi:
+            dst_item.vi_tri = item_req.vi_tri_moi
             
         # Increment destination
         dst_item.tong_nhap += item_req.so_luong
@@ -147,9 +149,9 @@ def create_transfer(data: TransferCreate, db: Session = Depends(get_db), current
         db.add(tx_in)
         
     db.commit()
-    db.refresh(new_transfer)
-    log_action(db, None, current_user, "Tạo lệnh chuyển kho", f"Mã phiếu: {new_transfer.ma_phieu}")
-    return new_transfer
+    db.refresh(transfer)
+    log_action(db, None, current_user, "Tạo lệnh chuyển kho", f"Mã phiếu: {transfer.ma_phieu}")
+    return transfer
 
 @router.get("/{id}")
 def get_transfer(id: int, db: Session = Depends(get_db), current_user = Depends(deps.get_current_user)):
@@ -178,6 +180,7 @@ def get_transfer(id: int, db: Session = Depends(get_db), current_user = Depends(
         vi_tri_moi = import_tx.item.vi_tri if import_tx and import_tx.item and import_tx.item.vi_tri else ""
         
         transactions_list.append({
+            "item_id": tx.item_id,
             "ma_so": tx.ma_so,
             "ten_hang": tx.ten_hang,
             "so_luong": tx.so_luong,
@@ -221,6 +224,151 @@ def export_transfer_excel(id: int, db: Session = Depends(get_db), current_user =
             "Content-Disposition": f"attachment; filename*=UTF-8''{encoded_filename}"
         }
     )
+
+@router.put("/{id}", response_model=TransferResponse)
+def update_transfer(id: int, transfer: TransferUpdate, db: Session = Depends(get_db), current_user = Depends(deps.get_current_user)):
+    # Check permissions
+    check_warehouse_permission(current_user, transfer.tu_kho_id, "perm_edit", db)
+    if transfer.tu_kho_id != transfer.den_kho_id:
+        check_warehouse_permission(current_user, transfer.den_kho_id, "perm_edit", db)
+        
+    old_transfer = db.query(Transfer).filter(Transfer.id == id).first()
+    if not old_transfer:
+        raise HTTPException(status_code=404, detail="Không tìm thấy phiếu chuyển")
+
+    if old_transfer.tu_kho_id != transfer.tu_kho_id or old_transfer.den_kho_id != transfer.den_kho_id:
+        raise HTTPException(status_code=400, detail="Không được đổi kho đi hoặc kho đến của phiếu")
+
+    # 1. Rollback old transactions
+    txs = db.query(Transaction).filter(Transaction.transfer_id == id).all()
+    for tx in txs:
+        item = db.query(Item).filter(Item.id == tx.item_id).first()
+        if item:
+            if tx.loai == TransactionType.EXPORT:
+                item.tong_xuat -= tx.so_luong
+                item.ton_cuoi += tx.so_luong
+            elif tx.loai == TransactionType.IMPORT:
+                item.tong_nhap -= tx.so_luong
+                item.ton_cuoi -= tx.so_luong
+                
+    # Calculate changes for logging
+    changes = []
+    if old_transfer.ngay_chuyen != transfer.ngay_chuyen:
+        changes.append(f"Ngày: {old_transfer.ngay_chuyen}->{transfer.ngay_chuyen}")
+    if (old_transfer.nguoi_chuyen or '') != (transfer.nguoi_chuyen or ''):
+        changes.append(f"Ng.chuyển: '{old_transfer.nguoi_chuyen}'->'{transfer.nguoi_chuyen}'")
+    if (old_transfer.ghi_chu or '') != (transfer.ghi_chu or ''):
+        changes.append(f"Ghi chú: '{old_transfer.ghi_chu}'->'{transfer.ghi_chu}'")
+        
+    old_items_dict = {tx.item_id: tx for tx in txs if tx.loai == TransactionType.EXPORT}
+    new_items_dict = {req.item_id: req for req in transfer.items}
+    
+    for item_id, old_t in old_items_dict.items():
+        if item_id not in new_items_dict:
+            changes.append(f"Xóa VT {old_t.ma_so}")
+    
+    # 2. Delete old transactions
+    db.query(Transaction).filter(Transaction.transfer_id == id).delete()
+
+    # 3. Update header
+    old_transfer.ngay_chuyen = transfer.ngay_chuyen
+    old_transfer.nguoi_chuyen = transfer.nguoi_chuyen
+    old_transfer.ghi_chu = transfer.ghi_chu
+    
+    # 4. Check new stock & Apply new transactions
+    for req_item in transfer.items:
+        # get source item
+        src_item = db.query(Item).filter(Item.id == req_item.item_id, Item.kho_id == transfer.tu_kho_id).first()
+        if not src_item:
+            raise HTTPException(status_code=404, detail=f"Không tìm thấy vật tư ở kho đi")
+            
+        if src_item.ton_cuoi < req_item.so_luong:
+            raise HTTPException(status_code=400, detail=f"Vật tư {src_item.ma_so} ở kho đi không đủ tồn (chỉ còn {src_item.ton_cuoi})")
+            
+        # get or create destination item
+        dest_item = db.query(Item).filter(Item.ma_so == src_item.ma_so, Item.kho_id == transfer.den_kho_id).first()
+        if not dest_item:
+            dest_item = Item(
+                ma_so=src_item.ma_so,
+                ten_hang=src_item.ten_hang,
+                don_vi_tinh=src_item.don_vi_tinh,
+                dinh_muc=src_item.dinh_muc,
+                cong_doan=src_item.cong_doan,
+                ma_quan_ly=src_item.ma_quan_ly,
+                hinh_anh=src_item.hinh_anh,
+                thong_so_ky_thuat=src_item.thong_so_ky_thuat,
+                loai_vat_tu=src_item.loai_vat_tu,
+                kho_id=transfer.den_kho_id,
+                vi_tri=req_item.vi_tri_moi or "",
+                tong_nhap=0,
+                tong_xuat=0,
+                ton_cuoi=0
+            )
+            db.add(dest_item)
+            db.flush()
+        elif req_item.vi_tri_moi:
+            dest_item.vi_tri = req_item.vi_tri_moi
+
+        # Log item changes
+        if req_item.item_id not in old_items_dict:
+            changes.append(f"Thêm VT {src_item.ma_so} (SL: {req_item.so_luong})")
+        else:
+            old_t = old_items_dict[req_item.item_id]
+            if old_t.so_luong != req_item.so_luong:
+                changes.append(f"VT {src_item.ma_so}: SL {old_t.so_luong}->{req_item.so_luong}")
+
+        # create EXPORT tx
+        tx_out = Transaction(
+            loai=TransactionType.EXPORT,
+            item_id=src_item.id,
+            transfer_id=old_transfer.id,
+            ngay=transfer.ngay_chuyen,
+            ma_quan_ly=src_item.ma_quan_ly,
+            ten_hang=src_item.ten_hang,
+            ma_so=src_item.ma_so,
+            so_luong=req_item.so_luong,
+            don_vi_tinh=src_item.don_vi_tinh,
+            cong_doan=src_item.cong_doan,
+            nguoi_xuat=transfer.nguoi_chuyen,
+            trang_thai="Có kiểm kê",
+            loai_xuat="Chuyển kho",
+            ghi_chu=transfer.ghi_chu,
+            kho_id=transfer.tu_kho_id
+        )
+        db.add(tx_out)
+        
+        # create IMPORT tx
+        tx_in = Transaction(
+            loai=TransactionType.IMPORT,
+            item_id=dest_item.id,
+            transfer_id=old_transfer.id,
+            ngay=transfer.ngay_chuyen,
+            ma_quan_ly=dest_item.ma_quan_ly,
+            ten_hang=dest_item.ten_hang,
+            ma_so=dest_item.ma_so,
+            so_luong=req_item.so_luong,
+            don_vi_tinh=dest_item.don_vi_tinh,
+            cong_doan=dest_item.cong_doan,
+            nguoi_nhap=transfer.nguoi_chuyen,
+            trang_thai="Có kiểm kê",
+            ghi_chu=transfer.ghi_chu,
+            kho_id=transfer.den_kho_id
+        )
+        db.add(tx_in)
+        
+        # Update stock
+        src_item.tong_xuat += req_item.so_luong
+        src_item.ton_cuoi -= req_item.so_luong
+        
+        dest_item.tong_nhap += req_item.so_luong
+        dest_item.ton_cuoi += req_item.so_luong
+        
+    db.commit()
+    db.refresh(old_transfer)
+    
+    change_detail = "; ".join(changes) if changes else "Không thay đổi"
+    log_action(db, None, current_user, "Sửa lệnh chuyển kho", f"Mã phiếu: {old_transfer.ma_phieu}. {change_detail}")
+    return old_transfer
 
 @router.delete("/{id}")
 def delete_transfer(id: int, db: Session = Depends(get_db), current_user = Depends(deps.get_current_user)):

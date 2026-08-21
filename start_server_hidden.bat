@@ -1,4 +1,7 @@
 @echo off
+if "%~1"=="invisible" goto :run
+mshta vbscript:createobject("wscript.shell").run("""%~f0"" invisible",0)(window.close)&exit
+:run
 chcp 65001 >nul
 title Khởi động WMS Server
 

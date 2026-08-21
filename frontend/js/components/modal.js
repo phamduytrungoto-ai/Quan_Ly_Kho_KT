@@ -12,6 +12,42 @@ const ModalSystem = {
         // Đóng khi click nút X
         document.getElementById('modalClose').addEventListener('click', () => this.hide());
         
+        // Phóng to/thu nhỏ khi click nút Maximize
+        document.getElementById('modalMaximize').addEventListener('click', () => {
+            const icon = document.querySelector('#modalMaximize i');
+            if (this.modal.classList.contains('maximized')) {
+                this.modal.classList.remove('maximized');
+                icon.className = 'fas fa-expand';
+                // Reset styles
+                this.modal.style.width = '';
+                this.modal.style.height = '';
+                this.modal.style.maxWidth = this._lastMaxWidth || '640px';
+                this.modal.style.maxHeight = '';
+                this.modal.style.margin = '';
+                this.modal.style.borderRadius = '';
+                this.modal.style.display = '';
+                this.modal.style.flexDirection = '';
+                this.overlay.style.padding = '';
+                if (this.body) this.body.style.flex = '';
+            } else {
+                this.modal.classList.add('maximized');
+                icon.className = 'fas fa-compress';
+                // Save current width
+                this._lastMaxWidth = this.modal.style.maxWidth;
+                // Force max styles
+                this.modal.style.width = '100%';
+                this.modal.style.height = '100%';
+                this.modal.style.maxWidth = '100vw';
+                this.modal.style.maxHeight = '100vh';
+                this.modal.style.margin = '0';
+                this.modal.style.borderRadius = '0';
+                this.modal.style.display = 'flex';
+                this.modal.style.flexDirection = 'column';
+                this.overlay.style.padding = '0';
+                if (this.body) this.body.style.flex = '1';
+            }
+        });
+        
         // Đóng khi click ra ngoài overlay (Tạm thời vô hiệu hóa theo yêu cầu)
         this.overlay.addEventListener('click', (e) => {
             // if (e.target === this.overlay) this.hide();
@@ -29,6 +65,11 @@ const ModalSystem = {
     },
 
     show(options) {
+        // Reset maximized state
+        this.modal.classList.remove('maximized');
+        const maximizeIcon = document.querySelector('#modalMaximize i');
+        if(maximizeIcon) maximizeIcon.className = 'fas fa-expand';
+
         this.title.textContent = options.title || 'Thông báo';
         
         // Set body
@@ -274,6 +315,17 @@ const FloatingWindowSystem = {
                 }
             };
             headerActions.appendChild(exportExcelBtn);
+        }
+
+        if (options.buttons && options.buttons.length > 0) {
+            options.buttons.forEach(btnInfo => {
+                const btn = document.createElement('button');
+                btn.className = btnInfo.className || 'btn btn-ghost btn-sm';
+                btn.innerHTML = btnInfo.html;
+                if (btnInfo.id) btn.id = btnInfo.id;
+                btn.onclick = () => btnInfo.onClick(win);
+                headerActions.appendChild(btn);
+            });
         }
 
         const closeBtn = document.createElement('button');

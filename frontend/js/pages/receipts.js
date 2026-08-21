@@ -237,7 +237,7 @@ const ReceiptsPage = {
     },
 
     updateItemsTable() {
-        const tbody = document.querySelector('#itemsTable tbody');
+        const tbody = document.querySelector('#page-receipts #itemsTable tbody');
         const submitBtn = document.querySelector('#page-receipts #btnSubmitReceipt');
         
         if (this.currentItems.length === 0) {
@@ -364,6 +364,18 @@ const ReceiptsPage = {
         btnCloseForm.addEventListener('click', () => {
             formCard.style.display = 'none';
             btnToggleForm.style.display = 'inline-block';
+            
+            // Reset edit mode if closing
+            if (this.editingReceiptId) {
+                this.editingReceiptId = null;
+                document.querySelector('#page-receipts #receiptForm').reset();
+                document.querySelector('#page-receipts #ngay_nhap').value = utils.getTodayYYYYMMDD();
+                document.querySelector('#page-receipts #nguoi_nhap').value = window.Auth ? (window.Auth.user.full_name || window.Auth.user.username) : '';
+                document.querySelector('#page-receipts #btnSubmitReceipt').innerHTML = '<i class="fas fa-save"></i> Xác nhận nhập kho';
+                document.querySelector('#page-receipts #receiptFormCard .card-title').innerHTML = '<i class="fas fa-file-import"></i> Lập Phiếu Nhập Kho';
+                this.currentItems = [];
+                this.updateItemsTable();
+            }
         });
 
         // Autocomplete
@@ -562,12 +574,21 @@ const ReceiptsPage = {
             utils.setLoading(submitBtn, true);
 
             try {
-                await api.receipts.create(data);
-                window.toast.success('Đã lưu phiếu nhập kho thành công');
+                if (this.editingReceiptId) {
+                    await api.receipts.update(this.editingReceiptId, data);
+                    window.toast.success('Đã cập nhật phiếu nhập kho thành công');
+                } else {
+                    await api.receipts.create(data);
+                    window.toast.success('Đã lưu phiếu nhập kho thành công');
+                }
                 
                 // Reset form
+                this.editingReceiptId = null;
+                submitBtn.innerHTML = '<i class="fas fa-save"></i> Xác nhận nhập kho';
+                document.querySelector('#page-receipts #receiptFormCard .card-title').innerHTML = '<i class="fas fa-file-import"></i> Lập Phiếu Nhập Kho';
                 document.querySelector('#page-receipts #receiptForm').reset();
                 document.querySelector('#page-receipts #ngay_nhap').value = utils.getTodayYYYYMMDD();
+                document.querySelector('#page-receipts #nguoi_nhap').value = window.Auth ? window.Auth.user.full_name : '';
                 this.currentItems = [];
                 this.updateItemsTable();
                 
@@ -650,6 +671,36 @@ const ReceiptsPage = {
                 ${utils.generatePrintTemplate('receipt', receipt)}
             `;
             
+            const buttons = [];
+            if (window.Auth && window.Auth.hasPermission('perm_edit')) {
+                buttons.push({
+                    html: '<i class="fas fa-edit"></i> Sửa',
+                    className: 'btn btn-ghost btn-sm text-warning',
+                    onClick: (win) => {
+                        win.remove();
+                        ReceiptsPage.editReceipt(receipt);
+                    }
+                });
+            }
+            if (window.Auth && window.Auth.hasPermission('perm_delete')) {
+                buttons.push({
+                    html: '<i class="fas fa-trash"></i> Xóa',
+                    className: 'btn btn-ghost btn-sm text-danger',
+                    onClick: async (win) => {
+                        if (confirm('Bạn có chắc chắn muốn xóa phiếu này? Số lượng tồn kho sẽ được tính toán lại.')) {
+                            try {
+                                await api.receipts.delete(id);
+                                window.toast.success('Xóa phiếu thành công');
+                                win.remove();
+                                ReceiptsPage.loadData();
+                            } catch (error) {
+                                window.toast.error(error.message);
+                            }
+                        }
+                    }
+                });
+            }
+
             window.floatingWindow.show({
                 id: 'receipt-' + id,
                 title: 'Chi Tiết Phiếu Nhập Kho - ' + receipt.ma_phieu,
@@ -657,11 +708,50 @@ const ReceiptsPage = {
                 width: '1400px',
                 height: '800px',
                 print: true,
-                exportExcelUrl: `${API_BASE_URL}/receipts/${id}/export-excel`
+                exportExcelUrl: `${API_BASE_URL}/receipts/${id}/export-excel`,
+                buttons: buttons
             });
         } catch (error) {
             window.toast.error('Không thể tải chi tiết phiếu nhập');
         }
+    },
+    
+    editReceipt(receipt) {
+        this.editingReceiptId = receipt.id;
+        
+        // Open form if closed
+        const formCard = document.querySelector('#page-receipts #receiptFormCard');
+        const btnToggleForm = document.querySelector('#page-receipts #btnToggleForm');
+        if (formCard.style.display === 'none') {
+            btnToggleForm.click();
+        }
+        
+        // Populate header
+        document.querySelector('#page-receipts #receiptFormCard .card-title').innerHTML = `<i class="fas fa-edit"></i> Sửa Phiếu Nhập: ${receipt.ma_phieu}`;
+        document.querySelector('#page-receipts #ngay_nhap').value = receipt.ngay_nhap;
+        document.querySelector('#page-receipts #nguoi_nhap').value = receipt.nguoi_nhap;
+        document.querySelector('#page-receipts #ghi_chu').value = receipt.ghi_chu || '';
+        
+        // Populate items mapping from transactions
+        this.currentItems = receipt.transactions.map(tx => ({
+            item_id: tx.item_id || tx.id, // tx doesn't have item_id in response? Wait, it doesn't.
+            ma_so: tx.ma_so,
+            ten_hang: tx.ten_hang,
+            so_luong: tx.so_luong,
+            don_vi_tinh: tx.don_vi_tinh,
+            ton_cuoi: tx.ton_cuoi || 0,
+            ghi_chu: tx.ghi_chu || ''
+        }));
+        
+        this.updateItemsTable();
+        
+        // Update button
+        const submitBtn = document.querySelector('#page-receipts #btnSubmitReceipt');
+        submitBtn.innerHTML = '<i class="fas fa-save"></i> Cập nhật phiếu';
+        submitBtn.disabled = false;
+        
+        // Scroll to form
+        formCard.scrollIntoView({ behavior: 'smooth' });
     },
     
     renderReceiptDropdown(receipts) {

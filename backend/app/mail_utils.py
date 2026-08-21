@@ -136,18 +136,18 @@ def send_warning_email(recipient_emails: list, items: list, warehouse_name: str 
             orange_bold_font = Font(color="FFA500", bold=True)
             
             # Headers
-            headers = ["STT", "Mã số", "Tên hàng", "Vị trí", "Tồn cuối", "Định mức"]
+            headers = ["STT", "Mã số", "Tên hàng", "Loại vật tư", "ĐVT", "Vị trí", "Tồn cuối", "Định mức"]
             ws.append(headers)
             
             # Apply header styles
-            for col_num in range(1, 7):
+            for col_num in range(1, 9):
                 cell = ws.cell(row=1, column=col_num)
                 cell.font = header_font
                 cell.fill = header_fill
                 cell.border = thin_border
                 if col_num in [1]:
                     cell.alignment = align_center
-                elif col_num in [5, 6]:
+                elif col_num in [7, 8]:
                     cell.alignment = align_right
                 else:
                     cell.alignment = align_left
@@ -158,6 +158,8 @@ def send_warning_email(recipient_emails: list, items: list, warehouse_name: str 
                     idx,
                     item.ma_so or '',
                     item.ten_hang or '',
+                    item.loai_vat_tu or '',
+                    item.don_vi_tinh or '',
                     item.vi_tri or '',
                     item.ton_cuoi,
                     item.dinh_muc
@@ -165,18 +167,18 @@ def send_warning_email(recipient_emails: list, items: list, warehouse_name: str 
                 ws.append(row_data)
                 
                 row_num = idx + 1
-                for col_num in range(1, 7):
+                for col_num in range(1, 9):
                     cell = ws.cell(row=row_num, column=col_num)
                     cell.border = thin_border
                     
                     if col_num == 1:
                         cell.alignment = align_center
-                    elif col_num in [2, 3, 4]:
+                    elif col_num in [2, 3, 4, 5, 6]:
                         cell.alignment = align_left
-                    elif col_num == 5:
+                    elif col_num == 7:
                         cell.alignment = align_right
                         cell.font = red_bold_font
-                    elif col_num == 6:
+                    elif col_num == 8:
                         cell.alignment = align_right
                         cell.font = orange_bold_font
                 
@@ -185,8 +187,10 @@ def send_warning_email(recipient_emails: list, items: list, warehouse_name: str 
             ws.column_dimensions['B'].width = 20
             ws.column_dimensions['C'].width = 40
             ws.column_dimensions['D'].width = 15
-            ws.column_dimensions['E'].width = 12
-            ws.column_dimensions['F'].width = 12
+            ws.column_dimensions['E'].width = 10
+            ws.column_dimensions['F'].width = 15
+            ws.column_dimensions['G'].width = 12
+            ws.column_dimensions['H'].width = 12
                 
             # Save to BytesIO
             excel_stream = io.BytesIO()

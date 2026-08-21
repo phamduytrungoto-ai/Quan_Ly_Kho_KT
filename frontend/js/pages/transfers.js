@@ -87,7 +87,7 @@ const TransfersPage = {
         }
     },
 
-    async showModal() {
+    async showModal(transfer = null) {
         const warehouses = await api.fetchJSON('/warehouses');
         let allOptionsHtml = '';
         let allowedOptionsHtml = '';
@@ -148,8 +148,10 @@ const TransfersPage = {
                     <thead>
                         <tr>
                             <th>Vật tư (Tìm theo mã/tên)</th>
-                            <th width="120">Số lượng</th>
-                            <th width="60"></th>
+                            <th style="width: 130px;">Vị trí (Từ)</th>
+                            <th style="width: 70px;">Số lượng</th>
+                            <th style="width: 130px;">Vị trí (Đến)</th>
+                            <th style="width: 40px;"></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -160,24 +162,44 @@ const TransfersPage = {
             </form>
         `;
         
+        this.editingTransferId = transfer ? transfer.id : null;
+        
         window.modal.show({
-            title: 'Tạo phiếu chuyển kho',
+            title: transfer ? 'Sửa phiếu chuyển kho' : 'Tạo phiếu chuyển kho',
             content: content,
-            width: '800px',
+            width: '1000px',
             buttons: [
                 { text: 'Hủy', class: 'btn-ghost text-muted' },
-                { text: 'Tạo phiếu', class: 'btn-primary', onClick: async () => this.submitTransfer() }
+                { text: transfer ? 'Cập nhật phiếu' : 'Tạo phiếu', class: 'btn-primary', onClick: async () => this.submitTransfer() }
             ]
         });
         
-        // Add random ma phieu
-        document.getElementById('tr_ma_phieu').value = 'CK-' + new Date().getTime().toString().slice(-6);
+        if (transfer) {
+            document.getElementById('tr_ma_phieu').value = transfer.ma_phieu;
+            document.getElementById('tr_ma_phieu').readOnly = true;
+            document.getElementById('tr_ngay_chuyen').value = transfer.ngay_chuyen;
+            document.getElementById('tr_tu_kho').value = transfer.tu_kho_id;
+            document.getElementById('tr_tu_kho').disabled = true;
+            document.getElementById('tr_den_kho').value = transfer.den_kho_id;
+            document.getElementById('tr_den_kho').disabled = true;
+            document.getElementById('tr_nguoi_chuyen').value = transfer.nguoi_chuyen || '';
+            document.getElementById('tr_ghi_chu').value = transfer.ghi_chu || '';
+            
+            if (transfer.transactions && transfer.transactions.length > 0) {
+                transfer.transactions.forEach(tx => this.addItemRow(tx));
+            } else {
+                this.addItemRow();
+            }
+        } else {
+            // Add random ma phieu
+            document.getElementById('tr_ma_phieu').value = 'CK-' + new Date().getTime().toString().slice(-6);
+            this.addItemRow(); // add first row
+        }
         
         document.getElementById('btnAddItem').addEventListener('click', () => this.addItemRow());
-        this.addItemRow(); // add first row
     },
     
-    addItemRow() {
+    addItemRow(tx = null) {
         const tbody = document.querySelector('#transferItemsTable tbody');
         const tr = document.createElement('tr');
         tr.innerHTML = `
@@ -188,7 +210,9 @@ const TransfersPage = {
                     <div class="autocomplete-results" style="display: none; position: absolute; z-index: 100; width: 100%; max-height: 200px; overflow-y: auto; background: var(--bg-card); border: 1px solid var(--border-color); box-shadow: 0 4px 6px rgba(0,0,0,0.1);"></div>
                 </div>
             </td>
-            <td><input type="number" class="form-control item-qty" min="1" required></td>
+            <td><input type="text" class="form-control item-vitri-cu" readonly value="${tx && tx.vi_tri_cu ? tx.vi_tri_cu : ''}"></td>
+            <td><input type="number" class="form-control item-qty" min="1" required value="${tx ? tx.so_luong : ''}" style="width: 70px;"></td>
+            <td><input type="text" class="form-control item-vitri-moi" placeholder="Vị trí mới" value="${tx && tx.vi_tri_moi ? tx.vi_tri_moi : ''}"></td>
             <td class="text-center"><button type="button" class="btn btn-ghost btn-icon text-danger btn-remove-row" title="Xóa dòng"><i class="fas fa-trash"></i></button></td>
         `;
         tbody.appendChild(tr);
@@ -199,6 +223,11 @@ const TransfersPage = {
         const input = tr.querySelector('.search-item');
         const hidden = tr.querySelector('.item-id');
         const results = tr.querySelector('.autocomplete-results');
+        
+        if (tx) {
+            input.value = `${tx.ma_so} - ${tx.ten_hang}`;
+            hidden.value = tx.item_id;
+        }
         let timeout = null;
         
         input.addEventListener('input', (e) => {
@@ -214,7 +243,7 @@ const TransfersPage = {
                 const items = await api.fetchJSON('/items/all?search=' + encodeURIComponent(val) + '&kho_id=' + kho_id);
                 if (items.length > 0) {
                     results.innerHTML = items.map(item => `
-                        <div class="autocomplete-item" data-id="${item.id}" data-name="${utils.escapeHtml(item.ten_hang)}" style="padding: 8px; cursor: pointer; border-bottom: 1px solid var(--border-color);">
+                        <div class="autocomplete-item" data-id="${item.id}" data-name="${utils.escapeHtml(item.ten_hang)}" data-vitri="${utils.escapeHtml(item.vi_tri || '')}" style="padding: 8px; cursor: pointer; border-bottom: 1px solid var(--border-color); white-space: normal; word-break: break-word; line-height: 1.4;">
                             <strong>${utils.escapeHtml(item.ma_so)}</strong> - ${utils.escapeHtml(item.ten_hang)} (Tồn: ${item.ton_cuoi})
                         </div>
                     `).join('');
@@ -225,6 +254,7 @@ const TransfersPage = {
                             e.stopPropagation();
                             hidden.value = div.dataset.id;
                             input.value = div.dataset.name;
+                            tr.querySelector('.item-vitri-cu').value = div.dataset.vitri;
                             results.style.display = 'none';
                         });
                     });
@@ -273,6 +303,7 @@ const TransfersPage = {
         for (const tr of rows) {
             const itemId = tr.querySelector('.item-id').value;
             const qty = parseInt(tr.querySelector('.item-qty').value);
+            const vitri_moi = tr.querySelector('.item-vitri-moi').value.trim();
             if (!itemId) {
                 if(window.toast) window.toast.error('Vui lòng chọn vật tư từ danh sách gợi ý');
                 hasError = true;
@@ -283,7 +314,7 @@ const TransfersPage = {
                 hasError = true;
                 break;
             }
-            items.push({ item_id: parseInt(itemId), so_luong: qty });
+            items.push({ item_id: parseInt(itemId), so_luong: qty, vi_tri_moi: vitri_moi });
         }
         
         if (hasError) return;
@@ -303,8 +334,15 @@ const TransfersPage = {
         };
         
         try {
-            await api.fetchJSON('/transfers', { method: 'POST', body: JSON.stringify(data) });
-            if(window.toast) window.toast.success("Tạo phiếu chuyển kho thành công");
+            if (this.editingTransferId) {
+                data.tu_kho_id = document.getElementById('tr_tu_kho').value;
+                data.den_kho_id = document.getElementById('tr_den_kho').value;
+                await api.transfers.update(this.editingTransferId, data);
+                if(window.toast) window.toast.success("Cập nhật phiếu chuyển kho thành công");
+            } else {
+                await api.transfers.create(data);
+                if(window.toast) window.toast.success("Tạo phiếu chuyển kho thành công");
+            }
             window.modal.hide();
             this.loadData();
         } catch(e) {
@@ -337,6 +375,8 @@ const TransfersPage = {
                     <td>${utils.escapeHtml(t.ten_hang)}</td>
                     <td class="text-right">${utils.formatNumber(t.so_luong)}</td>
                     <td>${utils.escapeHtml(t.don_vi_tinh || '')}</td>
+                    <td>${utils.escapeHtml(t.vi_tri_cu || '')}</td>
+                    <td>${utils.escapeHtml(t.vi_tri_moi || '')}</td>
                     <td>${utils.escapeHtml(t.ghi_chu || '')}</td>
                 </tr>
             `).join('');
@@ -365,6 +405,8 @@ const TransfersPage = {
                                     <th>Tên Hàng Hóa</th>
                                     <th class="text-right">Số Lượng</th>
                                     <th>ĐVT</th>
+                                    <th>Vị Trí Từ</th>
+                                    <th>Vị Trí Đến</th>
                                     <th>Ghi Chú</th>
                                 </tr>
                             </thead>
@@ -377,6 +419,36 @@ const TransfersPage = {
                 ${utils.generatePrintTemplate('transfer', transfer)}
             `;
 
+            const buttons = [];
+            if (window.Auth && window.Auth.hasPermission('perm_edit')) {
+                buttons.push({
+                    html: '<i class="fas fa-edit"></i> Sửa',
+                    className: 'btn btn-ghost btn-sm text-warning',
+                    onClick: (win) => {
+                        win.remove();
+                        TransfersPage.showModal(transfer);
+                    }
+                });
+            }
+            if (window.Auth && window.Auth.hasPermission('perm_delete')) {
+                buttons.push({
+                    html: '<i class="fas fa-trash"></i> Xóa',
+                    className: 'btn btn-ghost btn-sm text-danger',
+                    onClick: async (win) => {
+                        if (confirm('Bạn có chắc chắn muốn xóa phiếu này? Dữ liệu tồn kho sẽ được tính toán lại.')) {
+                            try {
+                                await api.transfers.delete(id);
+                                window.toast.success('Xóa phiếu thành công');
+                                win.remove();
+                                TransfersPage.loadData();
+                            } catch (error) {
+                                window.toast.error(error.message);
+                            }
+                        }
+                    }
+                });
+            }
+
             window.floatingWindow.show({
                 id: 'transfer-' + id,
                 title: 'Chi Tiết Phiếu Chuyển Kho - ' + transfer.ma_phieu,
@@ -384,7 +456,8 @@ const TransfersPage = {
                 width: '1400px',
                 height: '800px',
                 print: true,
-                exportExcelUrl: `${API_BASE_URL}/transfers/${id}/export-excel`
+                exportExcelUrl: `${API_BASE_URL}/transfers/${id}/export-excel`,
+                buttons: buttons
             });
         } catch (error) {
             if(window.toast) window.toast.error('Không thể tải chi tiết phiếu chuyển: ' + error.message);

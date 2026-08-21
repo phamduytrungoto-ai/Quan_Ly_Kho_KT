@@ -9,7 +9,7 @@ from ..deps import apply_warehouse_filter, check_warehouse_access, check_warehou
 from ..logger import log_action
 from ..database import get_db
 from ..models import Item, Transaction, Receipt, TransactionType
-from ..schemas import ReceiptCreate, ReceiptResponse, ReceiptListResponse
+from ..schemas import ReceiptCreate, ReceiptResponse, ReceiptListResponse, ReceiptUpdate
 
 router = APIRouter(prefix="/api/receipts", tags=["receipts"])
 
@@ -133,6 +133,7 @@ def get_receipt(id: int, db: Session = Depends(get_db), current_user = Depends(d
         "ma_kho": receipt.warehouse.ma_kho if receipt.warehouse else "DP-EE",
         "transactions": [
             {
+                "item_id": tx.item_id,
                 "ma_so": tx.ma_so,
                 "ten_hang": tx.ten_hang,
                 "so_luong": tx.so_luong,
@@ -164,6 +165,98 @@ def export_receipt_excel(id: int, db: Session = Depends(get_db), current_user = 
             "Content-Disposition": f"attachment; filename*=UTF-8''{encoded_filename}"
         }
     )
+
+@router.put("/{id}", response_model=ReceiptResponse)
+def update_receipt(id: int, receipt: ReceiptUpdate, db: Session = Depends(get_db), current_user = Depends(deps.get_current_user)):
+    # Check permissions
+    check_warehouse_permission(current_user, receipt.kho_id, "perm_edit", db)
+    
+    old_receipt = db.query(Receipt).filter(Receipt.id == id).first()
+    if not old_receipt:
+        raise HTTPException(status_code=404, detail="Không tìm thấy phiếu nhập")
+        
+    if old_receipt.kho_id != receipt.kho_id:
+        raise HTTPException(status_code=400, detail="Không được thay đổi kho của phiếu")
+
+    # 1. Rollback old transactions
+    for trans in old_receipt.transactions:
+        item = db.query(Item).filter(Item.id == trans.item_id, Item.kho_id == old_receipt.kho_id).first()
+        if item:
+            item.tong_nhap -= trans.so_luong
+            item.ton_cuoi -= trans.so_luong
+            
+    # Calculate changes for logging
+    changes = []
+    if old_receipt.ngay_nhap != receipt.ngay_nhap:
+        changes.append(f"Ngày: {old_receipt.ngay_nhap}->{receipt.ngay_nhap}")
+    if (old_receipt.nguoi_nhap or '') != (receipt.nguoi_nhap or ''):
+        changes.append(f"Ng.nhập: '{old_receipt.nguoi_nhap}'->'{receipt.nguoi_nhap}'")
+    if (old_receipt.ghi_chu or '') != (receipt.ghi_chu or ''):
+        changes.append(f"Ghi chú: '{old_receipt.ghi_chu}'->'{receipt.ghi_chu}'")
+
+    old_items_dict = {t.item_id: t for t in old_receipt.transactions}
+    new_items_dict = {req.item_id: req for req in receipt.items}
+
+    for item_id, old_t in old_items_dict.items():
+        if item_id not in new_items_dict:
+            changes.append(f"Xóa VT {old_t.ma_so}")
+    
+    # 2. Delete old transactions (they will be recreated)
+    db.query(Transaction).filter(Transaction.receipt_id == id).delete()
+
+    # 3. Update header
+    old_receipt.ngay_nhap = receipt.ngay_nhap
+    old_receipt.nguoi_nhap = receipt.nguoi_nhap
+    old_receipt.ghi_chu = receipt.ghi_chu
+    
+    # 4. Create new transactions & apply to inventory
+    for req_item in receipt.items:
+        item = db.query(Item).filter(Item.id == req_item.item_id, Item.kho_id == receipt.kho_id).first()
+        if not item:
+            # If item not found, rollback the whole transaction automatically by throwing error
+            raise HTTPException(status_code=404, detail=f"Không tìm thấy vật tư ID {req_item.item_id}")
+            
+        # Log item changes
+        if req_item.item_id not in old_items_dict:
+            changes.append(f"Thêm VT {item.ma_so} (SL: {req_item.so_luong})")
+        else:
+            old_t = old_items_dict[req_item.item_id]
+            item_changes = []
+            if old_t.so_luong != req_item.so_luong:
+                item_changes.append(f"SL {old_t.so_luong}->{req_item.so_luong}")
+            if (old_t.ghi_chu or '') != (req_item.ghi_chu or ''):
+                item_changes.append(f"Ghi chú '{old_t.ghi_chu}'->'{req_item.ghi_chu}'")
+            if item_changes:
+                changes.append(f"VT {item.ma_so}: " + ", ".join(item_changes))
+            
+        trans = Transaction(
+            loai=TransactionType.IMPORT,
+            item_id=item.id,
+            receipt_id=old_receipt.id,
+            ngay=receipt.ngay_nhap,
+            ma_quan_ly=item.ma_quan_ly,
+            ten_hang=item.ten_hang,
+            ma_so=item.ma_so,
+            so_luong=req_item.so_luong,
+            don_vi_tinh=item.don_vi_tinh,
+            cong_doan=item.cong_doan,
+            nguoi_nhap=receipt.nguoi_nhap,
+            trang_thai="Có kiểm kê",
+            ghi_chu=req_item.ghi_chu,
+            kho_id=receipt.kho_id
+        )
+        db.add(trans)
+        
+        # update item
+        item.tong_nhap += req_item.so_luong
+        item.ton_cuoi += req_item.so_luong
+        
+    db.commit()
+    db.refresh(old_receipt)
+    
+    change_detail = "; ".join(changes) if changes else "Không thay đổi"
+    log_action(db, None, current_user, "Sửa phiếu nhập", f"Mã phiếu: {old_receipt.ma_phieu}. {change_detail}")
+    return old_receipt
 
 @router.delete("/{id}")
 def delete_receipt(id: int, db: Session = Depends(get_db), current_user = Depends(deps.get_current_user)):

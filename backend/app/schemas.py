@@ -196,10 +196,14 @@ class TransferBase(BaseModel):
 class TransferItemCreate(BaseModel):
     item_id: int
     so_luong: int
+    vi_tri_moi: str = ""
 
 
 class TransferCreate(TransferBase):
     items: List[TransferItemCreate]
+
+class TransferUpdate(TransferCreate):
+    pass
 
 
 class TransferResponse(TransferBase):
@@ -267,6 +271,9 @@ class ReceiptItemCreate(BaseModel):
 class ReceiptCreate(ReceiptBase):
     items: List[ReceiptItemCreate]
 
+class ReceiptUpdate(ReceiptCreate):
+    pass
+
 class ReceiptResponse(ReceiptBase):
     id: int
     ma_phieu: str
@@ -302,6 +309,9 @@ class IssueItemCreate(BaseModel):
 
 class IssueCreate(IssueBase):
     items: List[IssueItemCreate]
+
+class IssueUpdate(IssueCreate):
+    pass
 
 class IssueResponse(IssueBase):
     id: int

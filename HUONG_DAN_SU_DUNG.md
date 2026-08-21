@@ -14,8 +14,9 @@
 8. [Danh mục](#8-danh-mục)
 9. [Chuyển kho](#9-chuyển-kho)
 10. [Báo cáo](#10-báo-cáo)
-11. [Đổi mật khẩu & Đăng xuất](#11-đổi-mật-khẩu--đăng-xuất)
-12. [Mẹo sử dụng nhanh](#12-mẹo-sử-dụng-nhanh)
+11. [Lịch sử thao tác (Admin)](#11-lịch-sử-thao-tác-admin)
+12. [Đổi mật khẩu & Đăng xuất](#12-đổi-mật-khẩu--đăng-xuất)
+13. [Mẹo sử dụng nhanh](#13-mẹo-sử-dụng-nhanh)
 
 ---
 
@@ -51,6 +52,7 @@ Sau khi đăng nhập thành công, bạn sẽ thấy giao diện chính gồm 3
 | 🏷️ | **Danh mục** | Quản lý danh mục (công đoạn, nhân viên, ĐVT...) |
 | 🔄 | **Chuyển kho** | Chuyển vật tư giữa các kho |
 | 📑 | **Báo cáo** | Xem và xuất báo cáo |
+| 🛡️ | **Admin** | (Chỉ dành cho Quản trị viên) Quản lý người dùng, Cài đặt hệ thống, Kho, Lịch sử thao tác |
 
 ### 2.2. Thanh trên cùng (Topbar)
 - **Chọn kho:** Dropdown cho phép chuyển đổi giữa các kho (VD: Kho Kỹ thuật Sản xuất, Kho Kỹ thuật Thiết bị...). Tất cả dữ liệu trên trang sẽ thay đổi theo kho được chọn.
@@ -95,6 +97,7 @@ Nằm ngay trên đầu bảng, gồm các chức năng:
 - **Lọc loại vật tư:** Lọc theo Tiêu hao / Dự phòng / Công cụ dụng cụ.
 - **Lọc kiểm kê:** Lọc theo trạng thái Có/Không kiểm kê.
 - **Nút làm mới (🔄):** Xóa tất cả bộ lọc, tải lại dữ liệu mới nhất.
+- **Nút Nhập từ Excel:** Nhập nhanh nhiều vật tư mới hoặc cập nhật thông tin vật tư hàng loạt từ file mẫu Excel (Chỉ dành cho người có quyền Thêm).
 - **Nút Xuất Excel:** Xuất toàn bộ danh sách tồn kho ra file Excel (.xlsx).
 
 ### 4.2. Bảng danh sách vật tư
@@ -133,7 +136,7 @@ Nhấn vào **bất kỳ dòng nào** trong bảng để mở cửa sổ **Chi T
 - **Khu vực hình ảnh (bên trái):**
   - Hiển thị ảnh sản phẩm (nếu có).
   - Nhấn vào ảnh để phóng to (Lightbox), dùng mũi tên ◀ ▶ hoặc phím bàn phím để xem ảnh trước/sau.
-  - Nút **"Tải ảnh lên"** cho phép thêm ảnh mới cho sản phẩm.
+  - Nút **"Tải ảnh lên"** cho phép thêm ảnh mới cho sản phẩm (Cần có quyền Sửa/Admin).
 
 - **Thông tin sản phẩm (bên phải):**
   - Tên hàng, Mã số, Mã quản lý.
@@ -225,6 +228,11 @@ Mỗi dòng giao dịch hiển thị:
 - Phía dưới form là bảng liệt kê tất cả phiếu nhập đã tạo.
 - Nhấn vào phiếu để xem chi tiết (danh sách mặt hàng, số lượng, ngày nhập...).
 
+### 6.4. In phiếu nhập
+- Nhấn vào một phiếu trong danh sách để mở cửa sổ chi tiết.
+- Nhấn nút **"In"** (biểu tượng máy in) ở góc dưới cửa sổ.
+- Hệ thống sẽ hiển thị mẫu phiếu in chuẩn. Bạn có thể in ra máy in hoặc lưu dưới dạng PDF. (Lưu ý: Bạn cần có quyền In phiếu).
+
 ---
 
 ## 7. PHIẾU XUẤT KHO
@@ -261,6 +269,11 @@ Mỗi dòng giao dịch hiển thị:
 ### 7.3. Danh sách phiếu xuất đã tạo
 - Tương tự phiếu nhập, phía dưới là bảng liệt kê tất cả phiếu xuất.
 - Nhấn vào phiếu để xem chi tiết.
+
+### 7.4. In phiếu xuất
+- Nhấn vào một phiếu xuất trong danh sách để mở cửa sổ chi tiết.
+- Nhấn nút **"In"** ở góc dưới để mở giao diện in phiếu xuất kho. 
+- Mẫu in sẽ có đầy đủ thông tin: Người yêu cầu, người lập phiếu, danh sách vật tư và chữ ký xác nhận.
 
 ---
 
@@ -321,9 +334,19 @@ Trang báo cáo cho phép bạn xem và xuất các báo cáo tổng hợp dư�
 
 ---
 
-## 11. ĐỔI MẬT KHẨU & ĐĂNG XUẤT
+## 11. LỊCH SỬ THAO TÁC (Admin)
 
-### 11.1. Đổi mật khẩu
+Tính năng này dành riêng cho Quản trị viên (Admin) để theo dõi mọi hoạt động trong hệ thống.
+
+- **Xem chi tiết mọi thao tác:** Bao gồm Tạo, Sửa, Xóa trên các phân hệ (Tồn kho, Phiếu nhập, Phiếu xuất, Danh mục, Kho, Người dùng...).
+- **Nội dung ghi nhận:** Thời gian, Người thực hiện, Tên hành động, và **Chi tiết** cụ thể (Ví dụ: Thêm hàng hóa mã số gì, Xóa phiếu xuất gồm bao nhiêu mặt hàng, Đăng nhập/Đăng xuất...).
+- **Lọc và tìm kiếm:** Dễ dàng tìm kiếm thao tác theo tên nhân viên, loại hành động, hoặc xem theo khoảng thời gian.
+
+---
+
+## 12. ĐỔI MẬT KHẨU & ĐĂNG XUẤT
+
+### 12.1. Đổi mật khẩu
 1. Nhấn vào biểu tượng **"⋯"** (3 chấm) ở góc dưới cùng bên trái (thanh bên).
 2. Chọn **"Đổi mật khẩu"**.
 3. Nhập **Mật khẩu cũ**.
@@ -331,14 +354,14 @@ Trang báo cáo cho phép bạn xem và xuất các báo cáo tổng hợp dư�
 5. Nhập lại **Xác nhận mật khẩu mới**.
 6. Nhấn **Lưu** để hoàn tất.
 
-### 11.2. Đăng xuất
+### 12.2. Đăng xuất
 1. Nhấn vào biểu tượng **"⋯"** (3 chấm) ở góc dưới cùng bên trái.
 2. Chọn **"Đăng xuất"** (chữ đỏ).
 3. Hệ thống sẽ quay về màn hình đăng nhập.
 
 ---
 
-## 12. MẸO SỬ DỤNG NHANH
+## 13. MẸO SỬ DỤNG NHANH
 
 ### ⌨️ Thao tác nhanh
 - **F5:** Tải lại trang để cập nhật dữ liệu mới nhất.

@@ -378,8 +378,9 @@
         <a href="#sec8"><i class="fas fa-tags"></i> 8. Danh mục</a>
         <a href="#sec9"><i class="fas fa-exchange-alt"></i> 9. Chuyển kho</a>
         <a href="#sec10"><i class="fas fa-file-excel"></i> 10. Báo cáo</a>
-        <a href="#sec11"><i class="fas fa-key"></i> 11. Đổi mật khẩu</a>
-        <a href="#sec12"><i class="fas fa-lightbulb"></i> 12. Mẹo sử dụng</a>
+        <a href="#sec11"><i class="fas fa-shield-alt"></i> 11. Quản trị (Admin)</a>
+        <a href="#sec12"><i class="fas fa-key"></i> 12. Đổi mật khẩu</a>
+        <a href="#sec13"><i class="fas fa-lightbulb"></i> 13. Mẹo sử dụng</a>
     </nav>
 </aside>
 
@@ -430,6 +431,7 @@
                 <tr><td><i class="fas fa-tags"></i></td><td><strong>Danh mục</strong></td><td>Quản lý công đoạn, nhân viên, ĐVT...</td></tr>
                 <tr><td><i class="fas fa-exchange-alt"></i></td><td><strong>Chuyển kho</strong></td><td>Chuyển vật tư giữa các kho</td></tr>
                 <tr><td><i class="fas fa-file-excel"></i></td><td><strong>Báo cáo</strong></td><td>Xem và xuất báo cáo</td></tr>
+                <tr><td><i class="fas fa-shield-alt" style="color:var(--accent);"></i></td><td><strong>Admin</strong></td><td>Chỉ Quản trị viên: Hệ thống, Người dùng, Lịch sử thao tác</td></tr>
             </tbody>
         </table>
 
@@ -474,7 +476,7 @@
             <li><strong>Lọc trạng thái tồn:</strong> Chọn "Dưới định mức" để xem mặt hàng cần bổ sung.</li>
             <li><strong>Lọc loại vật tư:</strong> Tiêu hao / Dự phòng / Công cụ dụng cụ.</li>
             <li><strong>Lọc kiểm kê:</strong> Có / Không kiểm kê.</li>
-            <li><strong>Nút <i class="fas fa-sync-alt"></i>:</strong> Làm mới, xóa tất cả bộ lọc.</li>
+            <li><strong>Nút <i class="fas fa-file-upload"></i> Nhập từ Excel:</strong> Cập nhật hoặc thêm vật tư hàng loạt từ mẫu Excel (Chỉ dành cho người có quyền Thêm).</li>
             <li><strong>Nút Xuất Excel:</strong> Tải xuống file Excel (.xlsx).</li>
         </ul>
 
@@ -506,11 +508,11 @@
         <h3>4.4. Xem chi tiết sản phẩm</h3>
         <p>Nhấn vào <strong>bất kỳ dòng nào</strong> để mở cửa sổ chi tiết:</p>
         <ul>
-            <li><strong>Hình ảnh:</strong> Xem ảnh, phóng to (Lightbox), tải ảnh mới lên.</li>
+            <li><strong>Hình ảnh:</strong> Xem ảnh, phóng to (Lightbox), tải ảnh mới lên (Cần quyền Admin/Sửa).</li>
             <li><strong>Thông tin:</strong> Tên, Mã số, NCC, Vị trí, Loại vật tư, Tồn kho, Đơn giá.</li>
             <li><strong>Thông số kỹ thuật:</strong> Nhập/sửa thông số → nhấn <strong>"Lưu Thông Số"</strong>.</li>
             <li><strong>Nút Sửa:</strong> Chỉnh sửa tên, mã, ĐVT, vị trí, loại vật tư...</li>
-            <li><strong>Nút Xóa:</strong> Xóa vật tư (cần có quyền).</li>
+            <li><strong>Nút Xóa:</strong> Xóa vật tư (cần có quyền Xóa).</li>
         </ul>
     </div>
 
@@ -584,6 +586,13 @@
             <li>Nếu cần xóa, nhấn nút <i class="fas fa-trash" style="color:#ef4444;"></i> trên dòng đó.</li>
             <li>Nhấn <strong>"Xác nhận nhập kho"</strong> → Hệ thống tự động cập nhật tồn kho.</li>
         </ol>
+
+        <h3>6.3. In phiếu nhập</h3>
+        <ul>
+            <li>Nhấn vào một phiếu trong danh sách bên dưới để mở cửa sổ chi tiết.</li>
+            <li>Nhấn nút <strong>"In"</strong> (biểu tượng máy in) ở góc dưới cửa sổ.</li>
+            <li>Hệ thống sẽ hiển thị mẫu phiếu in chuẩn. Bạn có thể in ra máy in hoặc lưu dưới dạng PDF. (Cần quyền In phiếu).</li>
+        </ul>
     </div>
 
     <!-- SECTION 7 -->
@@ -619,6 +628,13 @@
 
         <h4>Bước 3: Xác nhận</h4>
         <p>Kiểm tra danh sách → Nhấn <strong>"Xác nhận xuất kho"</strong>. Tồn kho sẽ được trừ tự động.</p>
+
+        <h3>7.3. In phiếu xuất</h3>
+        <ul>
+            <li>Nhấn vào một phiếu xuất trong danh sách để xem chi tiết.</li>
+            <li>Nhấn nút <strong>"In"</strong> ở góc dưới để mở giao diện in.</li>
+            <li>Mẫu in sẽ có đầy đủ thông tin: Người yêu cầu, người lập phiếu, danh sách vật tư và chữ ký xác nhận.</li>
+        </ul>
     </div>
 
     <!-- SECTION 8 -->
@@ -675,9 +691,27 @@
 
     <!-- SECTION 11 -->
     <div class="section" id="sec11">
-        <h2><span class="num">11</span> ĐỔI MẬT KHẨU & ĐĂNG XUẤT</h2>
+        <h2><span class="num">11</span> QUẢN TRỊ & HỆ THỐNG (Admin)</h2>
+        <p>Tính năng này dành riêng cho Quản trị viên (Admin) để theo dõi và quản lý hệ thống.</p>
+        
+        <h3>11.1. Lịch sử thao tác</h3>
+        <ul>
+            <li><strong>Xem chi tiết mọi thao tác:</strong> Bao gồm Tạo, Sửa, Xóa trên các phân hệ (Tồn kho, Phiếu nhập/xuất, Danh mục, Kho, Người dùng...).</li>
+            <li><strong>Nội dung ghi nhận:</strong> Thời gian, Người thực hiện, Tên hành động, và <strong>Chi tiết</strong> cụ thể (Ví dụ: Thêm hàng hóa mã số gì, số lượng bao nhiêu, Đăng nhập/Đăng xuất...).</li>
+        </ul>
 
-        <h3>11.1. Đổi mật khẩu</h3>
+        <h3>11.2. Quản lý hệ thống</h3>
+        <ul>
+            <li><strong>Người dùng:</strong> Phân quyền truy cập các kho, cấp quyền Thêm/Sửa/Xóa.</li>
+            <li><strong>Cài đặt:</strong> Quản lý các cấu hình hệ thống chung (proxy, email...).</li>
+        </ul>
+    </div>
+
+    <!-- SECTION 12 -->
+    <div class="section" id="sec12">
+        <h2><span class="num">12</span> ĐỔI MẬT KHẨU & ĐĂNG XUẤT</h2>
+
+        <h3>12.1. Đổi mật khẩu</h3>
         <ol class="steps">
             <li>Nhấn biểu tượng <strong>"⋯"</strong> (3 chấm) ở góc dưới cùng bên trái.</li>
             <li>Chọn <strong>"Đổi mật khẩu"</strong>.</li>
@@ -685,16 +719,16 @@
             <li>Nhấn <strong>Lưu</strong> để hoàn tất.</li>
         </ol>
 
-        <h3>11.2. Đăng xuất</h3>
+        <h3>12.2. Đăng xuất</h3>
         <ol class="steps">
             <li>Nhấn biểu tượng <strong>"⋯"</strong> → Chọn <strong>"Đăng xuất"</strong> (chữ đỏ).</li>
             <li>Hệ thống quay về màn hình đăng nhập.</li>
         </ol>
     </div>
 
-    <!-- SECTION 12 -->
-    <div class="section" id="sec12">
-        <h2><span class="num">12</span> MẸO SỬ DỤNG NHANH</h2>
+    <!-- SECTION 13 -->
+    <div class="section" id="sec13">
+        <h2><span class="num">13</span> MẸO SỬ DỤNG NHANH</h2>
 
         <h3>⌨️ Phím tắt hữu ích</h3>
         <table>
